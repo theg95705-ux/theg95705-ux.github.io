@@ -2,8 +2,8 @@
 // FIREBASE IMPORTS
 // ==========================================
 
-import { 
-    initializeApp 
+import {
+    initializeApp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
 
@@ -58,7 +58,7 @@ const firebaseConfig = {
 
 
 // ==========================================
-// INITIALIZE FIREBASE
+// START FIREBASE
 // ==========================================
 
 const app = initializeApp(firebaseConfig);
@@ -79,15 +79,14 @@ const githubProvider = new GithubAuthProvider();
 
 
 // ==========================================
-// ADMIN SECURITY
+// ADMIN SETTINGS
 // ==========================================
 
-// Your GitHub account ID
-
-const adminUID = "304339676";
+const adminGithubID = "304339676";
 
 
 let isAdmin = false;
+
 
 
 
@@ -97,53 +96,36 @@ let isAdmin = false;
 // HTML ELEMENTS
 // ==========================================
 
-
 const adminOverlay =
-document.getElementById(
-    "adminOverlay"
-);
+document.getElementById("adminOverlay");
 
 
 const githubLogin =
-document.getElementById(
-    "githubLogin"
-);
+document.getElementById("githubLogin");
 
 
 const vehicleName =
-document.getElementById(
-    "vehicleName"
-);
+document.getElementById("vehicleName");
 
 
 const vehicleValue =
-document.getElementById(
-    "vehicleValue"
-);
+document.getElementById("vehicleValue");
 
 
 const vehicleDemand =
-document.getElementById(
-    "vehicleDemand"
-);
+document.getElementById("vehicleDemand");
 
 
 const vehicleImage =
-document.getElementById(
-    "vehicleImage"
-);
+document.getElementById("vehicleImage");
 
 
 const saveBtn =
-document.getElementById(
-    "saveBtn"
-);
+document.getElementById("saveBtn");
 
 
 const cancelBtn =
-document.getElementById(
-    "cancelBtn"
-);
+document.getElementById("cancelBtn");
 
 
 
@@ -153,17 +135,13 @@ document.getElementById(
 // GITHUB LOGIN
 // ==========================================
 
-
 if(githubLogin){
-
 
     githubLogin.addEventListener(
         "click",
         async()=>{
 
-
             try{
-
 
                 const result =
                 await signInWithPopup(
@@ -172,9 +150,8 @@ if(githubLogin){
                 );
 
 
-
                 console.log(
-                    "GitHub Login Successful"
+                    "GitHub login successful"
                 );
 
 
@@ -185,14 +162,8 @@ if(githubLogin){
 
 
                 console.log(
-                    "GitHub ID:",
-                    result.user.providerData[0]?.uid
-                );
-
-
-                console.log(
-                    "Email:",
-                    result.user.email
+                    "GitHub data:",
+                    result.user.providerData
                 );
 
 
@@ -201,30 +172,24 @@ if(githubLogin){
 
             catch(error){
 
-
                 console.log(
-                    "GitHub Login Error:",
+                    "GitHub login error:",
                     error.message
                 );
 
-
             }
-
 
         }
     );
-
 
 }
 
 
 
 
-
 // ==========================================
-// CHECK ADMIN LOGIN
+// CHECK ADMIN
 // ==========================================
-
 
 onAuthStateChanged(
     auth,
@@ -234,8 +199,16 @@ onAuthStateChanged(
         if(user){
 
 
+            const githubUser =
+            user.providerData.find(
+                provider =>
+                provider.providerId === "github.com"
+            );
+
+
+
             const githubID =
-            user.providerData[0]?.uid;
+            githubUser?.uid;
 
 
 
@@ -247,9 +220,8 @@ onAuthStateChanged(
 
 
             if(
-                githubID === adminUID
+                githubID === adminGithubID
             ){
-
 
                 isAdmin = true;
 
@@ -261,7 +233,6 @@ onAuthStateChanged(
 
             }
 
-
             else{
 
 
@@ -269,7 +240,7 @@ onAuthStateChanged(
 
 
                 console.log(
-                    "NOT ADMIN"
+                    "ADMIN ACCESS DENIED"
                 );
 
 
@@ -299,7 +270,6 @@ onAuthStateChanged(
 // VEHICLE SYSTEM
 // ==========================================
 
-
 let selectedCard = null;
 
 
@@ -310,12 +280,9 @@ let selectedCard = null;
 // LOAD VEHICLES FROM FIREBASE
 // ==========================================
 
-
 async function loadVehicles(){
 
-
     try{
-
 
         const snapshot =
         await getDocs(
@@ -323,18 +290,12 @@ async function loadVehicles(){
         );
 
 
-
         snapshot.forEach((item)=>{
 
 
-            const id =
-            item.id;
+            const id = item.id;
 
-
-            const data =
-            item.data();
-
-
+            const data = item.data();
 
 
 
@@ -365,11 +326,7 @@ async function loadVehicles(){
 
 
 
-
-            if(
-                nameElement &&
-                data.name
-            ){
+            if(nameElement && data.name){
 
                 nameElement.innerText =
                 data.name;
@@ -379,12 +336,7 @@ async function loadVehicles(){
 
 
 
-
-
-            if(
-                valueElement &&
-                data.value
-            ){
+            if(valueElement && data.value){
 
                 valueElement.innerText =
                 "$" +
@@ -396,28 +348,17 @@ async function loadVehicles(){
 
 
 
-
-
-            if(
-                demandElement &&
-                data.demand
-            ){
+            if(demandElement && data.demand){
 
                 demandElement.innerText =
-                data.demand +
-                "/10";
+                data.demand + "/10";
 
             }
 
 
 
 
-
-
-            if(
-                imageElement &&
-                data.image
-            ){
+            if(imageElement && data.image){
 
                 imageElement.src =
                 data.image;
@@ -425,9 +366,7 @@ async function loadVehicles(){
             }
 
 
-
         });
-
 
 
 
@@ -441,39 +380,37 @@ async function loadVehicles(){
 
     catch(error){
 
-
         console.log(
             "Vehicle loading error:",
             error
         );
 
-
     }
-
 
 }
 
 
 
 
-
 // ==========================================
-// LOAD SAVED DATA ON START
+// START LOADING DATA
 // ==========================================
-
 
 loadVehicles();
+
+
+
+
+
+
 // ==========================================
 // OPEN ADMIN PANEL
 // ==========================================
-
 
 const cards =
 document.querySelectorAll(
     ".card"
 );
-
-
 
 
 
@@ -486,20 +423,15 @@ cards.forEach(
             ()=>{
 
 
-
                 if(!isAdmin){
-
 
                     console.log(
                         "Admin access denied"
                     );
 
-
                     return;
 
-
                 }
-
 
 
 
@@ -510,11 +442,8 @@ cards.forEach(
 
 
 
-
-
                 const id =
                 card.dataset.id;
-
 
 
 
@@ -547,18 +476,12 @@ cards.forEach(
 
 
 
-
-
                 if(name){
-
 
                     vehicleName.value =
                     name.innerText;
 
-
                 }
-
-
 
 
 
@@ -566,16 +489,12 @@ cards.forEach(
 
                 if(value){
 
-
                     vehicleValue.value =
                     value.innerText
                     .replace("$","")
                     .replace(/,/g,"");
 
-
                 }
-
-
 
 
 
@@ -583,15 +502,11 @@ cards.forEach(
 
                 if(demand){
 
-
                     vehicleDemand.value =
                     demand.innerText
                     .replace("/10","");
 
-
                 }
-
-
 
 
 
@@ -599,10 +514,8 @@ cards.forEach(
 
                 if(image){
 
-
                     vehicleImage.value =
                     image.src;
-
 
                 }
 
@@ -610,14 +523,10 @@ cards.forEach(
 
 
 
-
-
                 if(adminOverlay){
-
 
                     adminOverlay.style.display =
                     "flex";
-
 
                 }
 
@@ -629,19 +538,11 @@ cards.forEach(
 
     }
 );
-
-
-
-
-
-
 // ==========================================
-// SAVE VEHICLE BUTTON
+// SAVE VEHICLE
 // ==========================================
-
 
 if(saveBtn){
-
 
     saveBtn.addEventListener(
         "click",
@@ -650,38 +551,26 @@ if(saveBtn){
 
             if(!isAdmin){
 
-
                 console.log(
                     "Save blocked - not admin"
                 );
 
-
                 return;
 
-
             }
-
-
-
 
 
 
 
             if(!selectedCard){
 
-
                 console.log(
                     "No vehicle selected"
                 );
 
-
                 return;
 
-
             }
-
-
-
 
 
 
@@ -693,13 +582,8 @@ if(saveBtn){
 
 
 
-
-
-
             let imageURL =
             vehicleImage.value;
-
-
 
 
 
@@ -709,14 +593,10 @@ if(saveBtn){
             // IMAGE UPLOAD
             // ==================================
 
-
             const imageUpload =
             document.getElementById(
                 "imageUpload"
             );
-
-
-
 
 
 
@@ -734,7 +614,6 @@ if(saveBtn){
 
 
 
-
                     const imageRef =
                     ref(
                         storage,
@@ -746,16 +625,10 @@ if(saveBtn){
 
 
 
-
-
-
                     await uploadBytes(
                         imageRef,
                         imageFile
                     );
-
-
-
 
 
 
@@ -778,7 +651,7 @@ if(saveBtn){
 
 
                     console.log(
-                        "Image upload failed:",
+                        "Image upload error:",
                         error
                     );
 
@@ -794,19 +667,14 @@ if(saveBtn){
 
 
 
-
-
             // ==================================
             // UPDATE PAGE
             // ==================================
-
-
 
             const nameElement =
             document.getElementById(
                 `name${id}`
             );
-
 
 
             const valueElement =
@@ -815,12 +683,10 @@ if(saveBtn){
             );
 
 
-
             const demandElement =
             document.getElementById(
                 `demand${id}`
             );
-
 
 
             const imageElement =
@@ -832,20 +698,12 @@ if(saveBtn){
 
 
 
-
-
-
-
             if(nameElement){
-
 
                 nameElement.innerText =
                 vehicleName.value;
 
-
             }
-
-
 
 
 
@@ -853,16 +711,12 @@ if(saveBtn){
 
             if(valueElement){
 
-
                 valueElement.innerText =
                 "$" +
                 Number(vehicleValue.value)
                 .toLocaleString();
 
-
             }
-
-
 
 
 
@@ -870,15 +724,11 @@ if(saveBtn){
 
             if(demandElement){
 
-
                 demandElement.innerText =
                 vehicleDemand.value +
                 "/10";
 
-
             }
-
-
 
 
 
@@ -889,13 +739,10 @@ if(saveBtn){
                 imageURL
             ){
 
-
                 imageElement.src =
                 imageURL;
 
-
             }
-
 
 
 
@@ -908,8 +755,6 @@ if(saveBtn){
             // SAVE TO FIRESTORE
             // ==================================
 
-
-
             const vehicleData = {
 
 
@@ -917,15 +762,12 @@ if(saveBtn){
                 vehicleName.value,
 
 
-
                 value:
                 vehicleValue.value,
 
 
-
                 demand:
                 vehicleDemand.value,
-
 
 
                 image:
@@ -933,9 +775,6 @@ if(saveBtn){
 
 
             };
-
-
-
 
 
 
@@ -953,11 +792,9 @@ if(saveBtn){
                         id
                     ),
 
-
                     vehicleData
 
                 );
-
 
 
 
@@ -985,19 +822,12 @@ if(saveBtn){
 
 
 
-
             if(adminOverlay){
-
 
                 adminOverlay.style.display =
                 "none";
 
-
             }
-
-
-
-
 
 
 
@@ -1008,15 +838,12 @@ if(saveBtn){
         }
     );
 
-
 }
 // ==========================================
 // CANCEL BUTTON
 // ==========================================
 
-
 if(cancelBtn){
-
 
     cancelBtn.addEventListener(
         "click",
@@ -1025,16 +852,13 @@ if(cancelBtn){
 
             if(adminOverlay){
 
-
                 adminOverlay.style.display =
                 "none";
-
 
             }
 
 
             selectedCard = null;
-
 
 
             console.log(
@@ -1045,10 +869,7 @@ if(cancelBtn){
         }
     );
 
-
 }
-
-
 
 
 
@@ -1058,9 +879,7 @@ if(cancelBtn){
 // CLOSE PANEL WHEN CLICKING OUTSIDE
 // ==========================================
 
-
 if(adminOverlay){
-
 
     adminOverlay.addEventListener(
         "click",
@@ -1076,9 +895,7 @@ if(adminOverlay){
                 "none";
 
 
-
                 selectedCard = null;
-
 
 
                 console.log(
@@ -1092,19 +909,15 @@ if(adminOverlay){
         }
     );
 
-
 }
 
 
 
 
 
-
-
 // ==========================================
-// SYSTEM STARTED
+// SYSTEM START
 // ==========================================
-
 
 console.log(
     "================================="
@@ -1127,8 +940,8 @@ console.log(
 
 
 console.log(
-    "Admin UID:",
-    adminUID
+    "Admin GitHub ID:",
+    adminGithubID
 );
 
 
