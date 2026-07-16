@@ -179,6 +179,22 @@ if(githubLogin){
                 console.log(
                     "GitHub Login Successful"
                 );
+                const result = await signInWithPopup(
+    auth,
+    githubProvider
+);
+
+
+console.log("Firebase UID:", result.user.uid);
+
+console.log(
+    "GitHub UID:",
+    result.user.providerData[0].uid
+);
+
+console.log(
+    "Email:",
+    result.user.email
 
 
 
