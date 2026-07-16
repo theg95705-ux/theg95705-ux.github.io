@@ -1,6 +1,9 @@
 // ==========================================
-// SCRIPT START
+// VEHICLE ADMIN SYSTEM
+// PART 1 - FIREBASE & LOGIN
 // ==========================================
+
+console.clear();
 
 console.log("=================================");
 console.log("Vehicle Admin System Starting...");
@@ -15,9 +18,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/fireba
 import {
     getFirestore,
     collection,
+    getDocs,
     doc,
-    setDoc,
-    getDocs
+    setDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 import {
@@ -55,7 +58,7 @@ const firebaseConfig = {
 };
 
 // ==========================================
-// INITIALIZE FIREBASE
+// START FIREBASE
 // ==========================================
 
 const app = initializeApp(firebaseConfig);
@@ -89,6 +92,12 @@ const adminPanel = document.getElementById("adminPanel");
 
 const loginOverlay = document.getElementById("loginOverlay");
 
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginBtn = document.getElementById("loginBtn");
+const loginCancelBtn = document.getElementById("loginCancelBtn");
+const loginError = document.getElementById("loginError");
+
 const vehicleName = document.getElementById("vehicleName");
 const vehicleValue = document.getElementById("vehicleValue");
 const vehicleDemand = document.getElementById("vehicleDemand");
@@ -99,27 +108,33 @@ const imageUpload = document.getElementById("imageUpload");
 const saveBtn = document.getElementById("saveBtn");
 const cancelBtn = document.getElementById("cancelBtn");
 
-const loginEmail = document.getElementById("loginEmail");
-const loginPassword = document.getElementById("loginPassword");
-const loginBtn = document.getElementById("loginBtn");
-const loginCancelBtn = document.getElementById("loginCancelBtn");
-const loginError = document.getElementById("loginError");
-
 // ==========================================
-// CHECK REQUIRED HTML
+// CHECK HTML
 // ==========================================
 
-console.log("Checking HTML...");
+console.log("Checking page...");
 
-if (!adminOverlay) console.error("Missing adminOverlay");
-if (!loginOverlay) console.error("Missing loginOverlay");
-if (!saveBtn) console.error("Missing saveBtn");
-if (!cancelBtn) console.error("Missing cancelBtn");
+[
+    adminOverlay,
+    adminPanel,
+    loginOverlay,
+    loginBtn,
+    saveBtn,
+    cancelBtn
+].forEach(element => {
+
+    if (!element) {
+
+        console.error("Missing HTML element.");
+
+    }
+
+});
 
 console.log("HTML Check Complete");
 
 // ==========================================
-// AUTH STATE
+// FIREBASE LOGIN STATE
 // ==========================================
 
 onAuthStateChanged(auth, (user) => {
@@ -130,7 +145,7 @@ onAuthStateChanged(auth, (user) => {
 
         isAdmin = false;
 
-        console.log("No user logged in");
+        console.log("No user logged in.");
 
         return;
 
@@ -153,42 +168,8 @@ onAuthStateChanged(auth, (user) => {
         console.log("=================================");
         console.log("ADMIN ACCESS DENIED");
         console.log("Expected:", ADMIN_EMAIL);
-        console.log("Got:", user.email);
+        console.log("Received:", user.email);
         console.log("=================================");
-
-    }
-
-});
-// ==========================================
-// OPEN LOGIN PANEL
-// CTRL + RIGHT ARROW
-// ==========================================
-
-document.addEventListener("keydown", (event) => {
-
-    if (event.ctrlKey && event.key === "ArrowRight") {
-
-        event.preventDefault();
-
-        if (isAdmin) {
-
-            alert("You are already logged in as Admin.");
-
-            return;
-
-        }
-
-        if (loginOverlay) {
-
-            loginOverlay.style.display = "flex";
-
-            if (loginEmail) {
-
-                loginEmail.focus();
-
-            }
-
-        }
 
     }
 
@@ -198,157 +179,41 @@ document.addEventListener("keydown", (event) => {
 // LOGIN BUTTON
 // ==========================================
 
-if (loginBtn) {
+loginBtn.addEventListener("click", async () => {
 
-    loginBtn.addEventListener("click", async () => {
+    loginError.style.display = "none";
 
-        if (loginError) {
+    const email = loginEmail.value.trim().toLowerCase();
 
-            loginError.style.display = "none";
+    const password = loginPassword.value;
 
-        }
+    if (!email || !password) {
 
-        const email = loginEmail.value.trim().toLowerCase();
+        loginError.textContent = "Enter your email and password.";
 
-        const password = loginPassword.value;
+        loginError.style.display = "block";
 
-        if (email === "" || password === "") {
+        return;
 
-            loginError.innerText = "Enter your email and password.";
+    }
 
-            loginError.style.display = "block";
+    loginBtn.disabled = true;
 
-            return;
-
-        }
-
-        try {
-
-            loginBtn.disabled = true;
-
-            loginBtn.innerText = "Signing In...";
-
-            const credential = await signInWithEmailAndPassword(
-
-                auth,
-
-                email,
-
-                password
-
-            );
-
-            console.log("Login Successful");
-
-            console.log("User:", credential.user.email);
-
-            loginOverlay.style.display = "none";
-
-            loginEmail.value = "";
-
-            loginPassword.value = "";
-
-            loginBtn.innerText = "Sign In";
-
-            loginBtn.disabled = false;
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            loginBtn.innerText = "Sign In";
-
-            loginBtn.disabled = false;
-
-            let message = "Login failed.";
-
-            switch (error.code) {
-
-                case "auth/invalid-email":
-                    message = "Invalid email.";
-                    break;
-
-                case "auth/user-not-found":
-                    message = "Email not found.";
-                    break;
-
-                case "auth/wrong-password":
-                    message = "Wrong password.";
-                    break;
-
-                case "auth/invalid-credential":
-                    message = "Wrong email or password.";
-                    break;
-
-                case "auth/too-many-requests":
-                    message = "Too many attempts. Try again later.";
-                    break;
-
-            }
-
-            loginError.innerText = message;
-
-            loginError.style.display = "block";
-
-        }
-
-    });
-
-}
-
-// ==========================================
-// CANCEL LOGIN
-// ==========================================
-
-if (loginCancelBtn) {
-
-    loginCancelBtn.addEventListener("click", () => {
-
-        loginOverlay.style.display = "none";
-
-        loginError.style.display = "none";
-
-        loginPassword.value = "";
-
-    });
-
-}
-
-// ==========================================
-// CLOSE LOGIN IF CLICK OUTSIDE
-// ==========================================
-
-if (loginOverlay) {
-
-    loginOverlay.addEventListener("click", (event) => {
-
-        if (event.target === loginOverlay) {
-
-            loginOverlay.style.display = "none";
-
-            loginError.style.display = "none";
-
-        }
-
-    });
-
-}
-
-// ==========================================
-// OPTIONAL LOGOUT
-// ==========================================
-
-async function logoutAdmin() {
+    loginBtn.textContent = "Signing In...";
 
     try {
 
-        await signOut(auth);
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
 
-        isAdmin = false;
+        loginOverlay.style.display = "none";
 
-        alert("Logged out.");
+        loginEmail.value = "";
+
+        loginPassword.value = "";
 
     }
 
@@ -356,19 +221,54 @@ async function logoutAdmin() {
 
         console.error(error);
 
+        loginError.textContent = error.message;
+
+        loginError.style.display = "block";
+
     }
 
-}
+    loginBtn.disabled = false;
+
+    loginBtn.textContent = "Sign In";
+
+});
+
 // ==========================================
-// VEHICLE SYSTEM
+// CLOSE LOGIN
 // ==========================================
 
-let selectedCard = null;
+loginCancelBtn.addEventListener("click", () => {
+
+    loginOverlay.style.display = "none";
+
+    loginPassword.value = "";
+
+    loginError.style.display = "none";
+
+});
 
 // ==========================================
-// LOAD VEHICLES
+// CLOSE WHEN CLICKING OUTSIDE
 // ==========================================
 
+loginOverlay.addEventListener("click", (event) => {
+
+    if (event.target === loginOverlay) {
+
+        loginOverlay.style.display = "none";
+
+        loginError.style.display = "none";
+
+    }
+
+});
+
+console.log("Authentication Ready");
+// ==========================================
+// PART 2 - LOAD VEHICLES & OPEN ADMIN PANEL
+// ==========================================
+
+// Load all vehicles from Firestore
 async function loadVehicles() {
 
     try {
@@ -378,7 +278,6 @@ async function loadVehicles() {
         snapshot.forEach((docSnap) => {
 
             const id = docSnap.id;
-
             const data = docSnap.data();
 
             const name = document.getElementById(`name${id}`);
@@ -386,41 +285,33 @@ async function loadVehicles() {
             const demand = document.getElementById(`demand${id}`);
             const image = document.getElementById(`image${id}`);
 
-            if (name && data.name) {
-
-                name.textContent = data.name;
-
+            if (name) {
+                name.textContent = data.name || "Unknown";
             }
 
-            if (value && data.value) {
-
+            if (value) {
                 value.textContent =
-                    "$" + Number(data.value).toLocaleString();
-
+                    "$" + Number(data.value || 0).toLocaleString();
             }
 
-            if (demand && data.demand) {
-
+            if (demand) {
                 demand.textContent =
-                    data.demand + "/10";
-
+                    (data.demand || 0) + "/10";
             }
 
             if (image && data.image) {
-
                 image.src = data.image;
-
             }
 
         });
 
-        console.log("Vehicles loaded.");
+        console.log("Vehicles Loaded");
 
     }
 
     catch (error) {
 
-        console.error("Vehicle load failed:", error);
+        console.error("Error loading vehicles:", error);
 
     }
 
@@ -432,79 +323,85 @@ loadVehicles();
 // OPEN ADMIN PANEL
 // ==========================================
 
+function openVehicleEditor(card) {
+
+    selectedCard = card;
+
+    const id = card.dataset.id;
+
+    vehicleName.value =
+        document.getElementById(`name${id}`).textContent;
+
+    vehicleValue.value =
+        document.getElementById(`value${id}`)
+            .textContent
+            .replace("$", "")
+            .replace(/,/g, "");
+
+    vehicleDemand.value =
+        document.getElementById(`demand${id}`)
+            .textContent
+            .replace("/10", "");
+
+    vehicleImage.value =
+        document.getElementById(`image${id}`).src;
+
+    adminOverlay.style.display = "flex";
+
+    console.log("Opened editor for vehicle", id);
+
+}
+
+// ==========================================
+// CLICK A VEHICLE
+// ==========================================
+
 document.querySelectorAll(".card").forEach((card) => {
 
     card.addEventListener("click", () => {
 
+        // Not logged in?
         if (!isAdmin) {
 
-            alert(
-                "You must login first.\n\nPress CTRL + → then login."
-            );
+            selectedCard = card;
+
+            loginOverlay.style.display = "flex";
+
+            loginEmail.focus();
 
             return;
 
         }
 
-        selectedCard = card;
-
-        const id = card.dataset.id;
-
-        const name =
-            document.getElementById(`name${id}`);
-
-        const value =
-            document.getElementById(`value${id}`);
-
-        const demand =
-            document.getElementById(`demand${id}`);
-
-        const image =
-            document.getElementById(`image${id}`);
-
-        if (name) {
-
-            vehicleName.value =
-                name.textContent;
-
-        }
-
-        if (value) {
-
-            vehicleValue.value =
-                value.textContent
-                    .replace("$", "")
-                    .replace(/,/g, "");
-
-        }
-
-        if (demand) {
-
-            vehicleDemand.value =
-                demand.textContent.replace("/10", "");
-
-        }
-
-        if (image) {
-
-            vehicleImage.value =
-                image.src;
-
-        }
-
-        adminOverlay.style.display = "flex";
-
-        console.log(
-            "Opened editor for vehicle",
-            id
-        );
+        // Already logged in
+        openVehicleEditor(card);
 
     });
 
 });
 
 // ==========================================
-// CLOSE WHEN CLICKING OUTSIDE
+// AFTER LOGIN OPEN THE PANEL
+// ==========================================
+
+onAuthStateChanged(auth, (user) => {
+
+    if (!user) return;
+
+    if (user.email.toLowerCase() !== ADMIN_EMAIL) return;
+
+    isAdmin = true;
+
+    if (selectedCard) {
+
+        openVehicleEditor(selectedCard);
+
+    }
+
+});
+
+// ==========================================
+// CLOSE ADMIN PANEL
 // ==========================================
 
 adminOverlay.addEventListener("click", (event) => {
@@ -518,145 +415,279 @@ adminOverlay.addEventListener("click", (event) => {
     }
 
 });
+
+console.log("Vehicle System Ready");
 // ==========================================
-// SAVE VEHICLE
+// PART 3 - SAVE VEHICLE
 // ==========================================
 
-if (saveBtn) {
+saveBtn.addEventListener("click", async () => {
 
-    saveBtn.addEventListener("click", async () => {
+    if (!isAdmin) {
 
-        if (!isAdmin) {
+        alert("You are not an admin.");
 
-            alert("Admin login required.");
+        return;
 
-            return;
+    }
 
-        }
+    if (!selectedCard) {
 
-        if (!selectedCard) {
+        alert("No vehicle selected.");
 
-            alert("No vehicle selected.");
+        return;
 
-            return;
+    }
 
-        }
+    saveBtn.disabled = true;
+
+    saveBtn.textContent = "Saving...";
+
+    try {
 
         const id = selectedCard.dataset.id;
 
         let imageURL = vehicleImage.value.trim();
 
-        try {
+        // ==================================
+        // Upload image if one was selected
+        // ==================================
 
-            // -----------------------------
-            // Upload image if one selected
-            // -----------------------------
+        if (imageUpload.files.length > 0) {
 
-            if (imageUpload && imageUpload.files.length > 0) {
+            const file = imageUpload.files[0];
 
-                const file = imageUpload.files[0];
+            console.log("Uploading image...");
 
-                const imageRef = ref(
-                    storage,
-                    `cars/${id}-${Date.now()}-${file.name}`
-                );
+            const storageRef = ref(
 
-                await uploadBytes(imageRef, file);
+                storage,
 
-                imageURL = await getDownloadURL(imageRef);
-
-                console.log("Image uploaded.");
-
-            }
-
-            // -----------------------------
-            // Save to Firestore
-            // -----------------------------
-
-            const vehicleData = {
-
-                name: vehicleName.value.trim(),
-
-                value: Number(vehicleValue.value),
-
-                demand: Number(vehicleDemand.value),
-
-                image: imageURL
-
-            };
-
-            await setDoc(
-
-                doc(db, "vehicles", id),
-
-                vehicleData
+                `cars/${id}-${Date.now()}-${file.name}`
 
             );
 
-            // -----------------------------
-            // Update page immediately
-            // -----------------------------
+            await uploadBytes(storageRef, file);
 
-            document.getElementById(`name${id}`).textContent =
-                vehicleData.name;
+            imageURL = await getDownloadURL(storageRef);
 
-            document.getElementById(`value${id}`).textContent =
-                "$" + vehicleData.value.toLocaleString();
-
-            document.getElementById(`demand${id}`).textContent =
-                vehicleData.demand + "/10";
-
-            if (imageURL) {
-
-                document.getElementById(`image${id}`).src =
-                    imageURL;
-
-            }
-
-            console.log("Vehicle saved successfully.");
-
-            adminOverlay.style.display = "none";
-
-            selectedCard = null;
-
-            alert("Vehicle saved!");
+            console.log("Image Uploaded");
 
         }
 
-        catch (error) {
+        // ==================================
+        // Vehicle object
+        // ==================================
 
-            console.error("Save failed:", error);
+        const vehicleData = {
 
-            alert("Save failed. Check the browser console.");
+            name: vehicleName.value.trim(),
+
+            value: Number(vehicleValue.value),
+
+            demand: Number(vehicleDemand.value),
+
+            image: imageURL
+
+        };
+
+        // ==================================
+        // Save to Firestore
+        // ==================================
+
+        await setDoc(
+
+            doc(db, "vehicles", id),
+
+            vehicleData
+
+        );
+
+        console.log("Saved to Firestore");
+
+        // ==================================
+        // Update page immediately
+        // ==================================
+
+        document.getElementById(`name${id}`).textContent =
+            vehicleData.name;
+
+        document.getElementById(`value${id}`).textContent =
+            "$" + vehicleData.value.toLocaleString();
+
+        document.getElementById(`demand${id}`).textContent =
+            vehicleData.demand + "/10";
+
+        if (imageURL !== "") {
+
+            document.getElementById(`image${id}`).src =
+                imageURL;
 
         }
 
-    });
-
-}
-
-// ==========================================
-// CANCEL BUTTON
-// ==========================================
-
-if (cancelBtn) {
-
-    cancelBtn.addEventListener("click", () => {
+        // ==================================
+        // Close panel
+        // ==================================
 
         adminOverlay.style.display = "none";
 
         selectedCard = null;
 
-    });
+        imageUpload.value = "";
+
+        alert("Vehicle Saved!");
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("Save Failed.\n\nCheck the browser console.");
+
+    }
+
+    saveBtn.disabled = false;
+
+    saveBtn.textContent = "Save";
+
+});
+
+// ==========================================
+// CANCEL BUTTON
+// ==========================================
+
+cancelBtn.addEventListener("click", () => {
+
+    adminOverlay.style.display = "none";
+
+    selectedCard = null;
+
+    imageUpload.value = "";
+
+});
+
+// ==========================================
+// LOGOUT FUNCTION
+// ==========================================
+
+async function logoutAdmin() {
+
+    try {
+
+        await signOut(auth);
+
+        isAdmin = false;
+
+        selectedCard = null;
+
+        console.log("Logged Out");
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+    }
 
 }
 
+console.log("Save System Ready");
 // ==========================================
-// STARTUP
+// PART 4 - FINAL STARTUP
 // ==========================================
 
-console.log("=================================");
-console.log("Vehicle Admin System Loaded");
-console.log("Firebase Connected");
-console.log("Authentication Ready");
-console.log("=================================");
+// Reload vehicles after login
+onAuthStateChanged(auth, (user) => {
+
+    if (user) {
+
+        console.log("Authentication Ready");
+        console.log("Logged in:", user.email);
+
+        loadVehicles();
+
+    } else {
+
+        console.log("Not logged in");
+
+    }
+
+});
+
+// ==========================================
+// WINDOW LOADED
+// ==========================================
+
+window.addEventListener("load", () => {
+
+    console.log("=================================");
+    console.log("Vehicle Admin System Loaded");
+    console.log("=================================");
+
+    console.log("Admin Email:", ADMIN_EMAIL);
+
+    console.log("Firebase Ready");
+
+    console.log("Firestore Ready");
+
+    console.log("Storage Ready");
+
+    console.log("Authentication Ready");
+
+    console.log("=================================");
+
+});
+
+// ==========================================
+// GLOBAL ERROR LOGGER
+// ==========================================
+
+window.addEventListener("error", (event) => {
+
+    console.error("JavaScript Error:");
+
+    console.error(event.message);
+
+    console.error(event.filename);
+
+    console.error("Line:", event.lineno);
+
+});
+
+// ==========================================
+// UNHANDLED PROMISES
+// ==========================================
+
+window.addEventListener("unhandledrejection", (event) => {
+
+    console.error("Unhandled Promise:");
+
+    console.error(event.reason);
+
+});
+
+// ==========================================
+// OPTIONAL DEBUG
+// ==========================================
+
+window.debugAdmin = () => {
+
+    console.log("========== DEBUG ==========");
+
+    console.log("Current User:", currentUser);
+
+    console.log("Is Admin:", isAdmin);
+
+    console.log("Selected Card:", selectedCard);
+
+    console.log("===========================");
+
+};
+
+// ==========================================
+// END
+// ==========================================
+
+console.log("Script Loaded Successfully");
