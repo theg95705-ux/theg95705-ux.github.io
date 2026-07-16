@@ -26,8 +26,6 @@ import {
 
 import {
     getAuth,
-    GithubAuthProvider,
-    signInWithPopup,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
@@ -73,21 +71,16 @@ const storage = getStorage(app);
 const auth = getAuth(app);
 
 
-const githubProvider = new GithubAuthProvider();
-
-
 
 
 // ==========================================
 // ADMIN SETTINGS
 // ==========================================
 
-const adminGithubID = "304339676";
+const adminEmail = "theg95705@gmail.com";
 
 
 let isAdmin = false;
-
-
 
 
 
@@ -98,10 +91,6 @@ let isAdmin = false;
 
 const adminOverlay =
 document.getElementById("adminOverlay");
-
-
-const githubLogin =
-document.getElementById("githubLogin");
 
 
 const vehicleName =
@@ -130,65 +119,8 @@ document.getElementById("cancelBtn");
 
 
 
-
 // ==========================================
-// GITHUB LOGIN
-// ==========================================
-
-if(githubLogin){
-
-    githubLogin.addEventListener(
-        "click",
-        async()=>{
-
-            try{
-
-                const result =
-                await signInWithPopup(
-                    auth,
-                    githubProvider
-                );
-
-
-                console.log(
-                    "GitHub login successful"
-                );
-
-
-                console.log(
-                    "Firebase UID:",
-                    result.user.uid
-                );
-
-
-                console.log(
-                    "GitHub data:",
-                    result.user.providerData
-                );
-
-
-            }
-
-
-            catch(error){
-
-                console.log(
-                    "GitHub login error:",
-                    error.message
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-
-
-// ==========================================
-// CHECK ADMIN
+// CHECK FIREBASE LOGIN
 // ==========================================
 
 onAuthStateChanged(
@@ -199,28 +131,15 @@ onAuthStateChanged(
         if(user){
 
 
-            const githubUser =
-            user.providerData.find(
-                provider =>
-                provider.providerId === "github.com"
-            );
-
-
-
-            const githubID =
-            githubUser?.uid;
-
-
-
             console.log(
-                "Logged in GitHub ID:",
-                githubID
+                "Logged in:",
+                user.email
             );
 
 
 
             if(
-                githubID === adminGithubID
+                user.email === adminEmail
             ){
 
                 isAdmin = true;
@@ -249,7 +168,6 @@ onAuthStateChanged(
 
         }
 
-
         else{
 
 
@@ -275,7 +193,6 @@ let selectedCard = null;
 
 
 
-
 // ==========================================
 // LOAD VEHICLES FROM FIREBASE
 // ==========================================
@@ -284,18 +201,23 @@ async function loadVehicles(){
 
     try{
 
+
         const snapshot =
         await getDocs(
             collection(db,"vehicles")
         );
 
 
+
         snapshot.forEach((item)=>{
 
 
-            const id = item.id;
+            const id =
+            item.id;
 
-            const data = item.data();
+
+            const data =
+            item.data();
 
 
 
@@ -326,7 +248,10 @@ async function loadVehicles(){
 
 
 
-            if(nameElement && data.name){
+            if(
+                nameElement &&
+                data.name
+            ){
 
                 nameElement.innerText =
                 data.name;
@@ -336,7 +261,10 @@ async function loadVehicles(){
 
 
 
-            if(valueElement && data.value){
+            if(
+                valueElement &&
+                data.value
+            ){
 
                 valueElement.innerText =
                 "$" +
@@ -348,7 +276,10 @@ async function loadVehicles(){
 
 
 
-            if(demandElement && data.demand){
+            if(
+                demandElement &&
+                data.demand
+            ){
 
                 demandElement.innerText =
                 data.demand + "/10";
@@ -358,7 +289,10 @@ async function loadVehicles(){
 
 
 
-            if(imageElement && data.image){
+            if(
+                imageElement &&
+                data.image
+            ){
 
                 imageElement.src =
                 data.image;
@@ -380,12 +314,15 @@ async function loadVehicles(){
 
     catch(error){
 
+
         console.log(
             "Vehicle loading error:",
             error
         );
 
+
     }
+
 
 }
 
@@ -393,12 +330,10 @@ async function loadVehicles(){
 
 
 // ==========================================
-// START LOADING DATA
+// START VEHICLE LOADING
 // ==========================================
 
 loadVehicles();
-
-
 
 
 
@@ -425,11 +360,14 @@ cards.forEach(
 
                 if(!isAdmin){
 
+
                     console.log(
                         "Admin access denied"
                     );
 
+
                     return;
+
 
                 }
 
@@ -455,16 +393,19 @@ cards.forEach(
                 );
 
 
+
                 const value =
                 document.getElementById(
                     `value${id}`
                 );
 
 
+
                 const demand =
                 document.getElementById(
                     `demand${id}`
                 );
+
 
 
                 const image =
@@ -476,13 +417,13 @@ cards.forEach(
 
 
 
+
                 if(name){
 
                     vehicleName.value =
                     name.innerText;
 
                 }
-
 
 
 
@@ -499,7 +440,6 @@ cards.forEach(
 
 
 
-
                 if(demand){
 
                     vehicleDemand.value =
@@ -507,7 +447,6 @@ cards.forEach(
                     .replace("/10","");
 
                 }
-
 
 
 
@@ -533,10 +472,12 @@ cards.forEach(
 
 
             }
+
         );
 
 
     }
+
 );
 // ==========================================
 // SAVE VEHICLE
@@ -551,11 +492,14 @@ if(saveBtn){
 
             if(!isAdmin){
 
+
                 console.log(
                     "Save blocked - not admin"
                 );
 
+
                 return;
+
 
             }
 
@@ -564,11 +508,14 @@ if(saveBtn){
 
             if(!selectedCard){
 
+
                 console.log(
                     "No vehicle selected"
                 );
 
+
                 return;
+
 
             }
 
@@ -584,6 +531,7 @@ if(saveBtn){
 
             let imageURL =
             vehicleImage.value;
+
 
 
 
@@ -660,6 +608,7 @@ if(saveBtn){
 
 
             }
+
 
 
 
@@ -750,9 +699,8 @@ if(saveBtn){
 
 
 
-
             // ==================================
-            // SAVE TO FIRESTORE
+            // SAVE FIRESTORE
             // ==================================
 
             const vehicleData = {
@@ -775,6 +723,7 @@ if(saveBtn){
 
 
             };
+
 
 
 
@@ -836,6 +785,7 @@ if(saveBtn){
 
 
         }
+
     );
 
 }
@@ -858,7 +808,9 @@ if(cancelBtn){
             }
 
 
+
             selectedCard = null;
+
 
 
             console.log(
@@ -867,9 +819,11 @@ if(cancelBtn){
 
 
         }
+
     );
 
 }
+
 
 
 
@@ -895,7 +849,9 @@ if(adminOverlay){
                 "none";
 
 
+
                 selectedCard = null;
+
 
 
                 console.log(
@@ -907,9 +863,11 @@ if(adminOverlay){
 
 
         }
+
     );
 
 }
+
 
 
 
@@ -935,13 +893,13 @@ console.log(
 
 
 console.log(
-    "GitHub Authentication Enabled"
+    "Email Authentication Enabled"
 );
 
 
 console.log(
-    "Admin GitHub ID:",
-    adminGithubID
+    "Admin Email:",
+    adminEmail
 );
 
 
