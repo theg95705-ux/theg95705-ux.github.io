@@ -1,6 +1,7 @@
 // ==========================================
 // FIREBASE IMPORTS
 // ==========================================
+console.log("SCRIPT.JS LOADED FROM GITHUB PAGES");
 
 import {
     initializeApp
