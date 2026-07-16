@@ -1,26 +1,94 @@
 // ==========================================
+// FIREBASE IMPORTS
+// ==========================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    doc,
+    setDoc,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+
+
+
+// ==========================================
+// FIREBASE CONFIG
+// ==========================================
+
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyCzyyZcuQsR19fsHnffGV0L2LCQ-RRuaGw",
+
+    authDomain: "admin-pannel-268a9.firebaseapp.com",
+
+    projectId: "admin-pannel-268a9",
+
+    storageBucket: "admin-pannel-268a9.firebasestorage.app",
+
+    messagingSenderId: "619934011757",
+
+    appId: "1:619934011757:web:8b4b98362df5f932fc0a64"
+
+};
+
+
+
+const app = initializeApp(firebaseConfig);
+
+
+const db = getFirestore(app);
+
+
+const storage = getStorage(app);
+
+
+
+
+
+// ==========================================
 // CAR VALUES ADMIN SYSTEM
 // ==========================================
 
 
-// Selected vehicle card
 let selectedCard = null;
 
 
-// Get elements
+
+
+// ==========================================
+// GET ELEMENTS
+// ==========================================
+
 
 const adminOverlay = document.getElementById("adminOverlay");
 
+
 const vehicleName = document.getElementById("vehicleName");
+
 
 const vehicleValue = document.getElementById("vehicleValue");
 
+
 const vehicleDemand = document.getElementById("vehicleDemand");
+
 
 const vehicleImage = document.getElementById("vehicleImage");
 
 
 const saveBtn = document.getElementById("saveBtn");
+
 
 const cancelBtn = document.getElementById("cancelBtn");
 
@@ -29,63 +97,62 @@ const cancelBtn = document.getElementById("cancelBtn");
 
 
 // ==========================================
-// LOAD SAVED VEHICLES
+// LOAD VEHICLES FROM FIREBASE
 // ==========================================
 
 
-window.onload = function(){
+async function loadVehicles(){
 
 
-    for(let i = 1; i <= 6; i++){
+    const snapshot = await getDocs(
+        collection(db,"vehicles")
+    );
 
 
-        let savedVehicle = localStorage.getItem("vehicle" + i);
+    snapshot.forEach((item)=>{
 
 
-        if(savedVehicle){
+        let id = item.id;
 
 
-            let data = JSON.parse(savedVehicle);
-
-
-
-            document.getElementById(`name${i}`).innerText =
-            data.name;
+        let data = item.data();
 
 
 
-            document.getElementById(`value${i}`).innerText =
-            "$" + Number(data.value).toLocaleString();
+        document.getElementById(`name${id}`).innerText =
+        data.name;
 
 
 
-            document.getElementById(`demand${i}`).innerText =
-            data.demand + "/10";
+        document.getElementById(`value${id}`).innerText =
+        "$" + Number(data.value).toLocaleString();
 
 
 
-            if(data.image){
+        document.getElementById(`demand${id}`).innerText =
+        data.demand + "/10";
 
-                document.getElementById(`image${i}`).src =
-                data.image;
 
-            }
+
+        if(data.image){
+
+
+            document.getElementById(`image${id}`).src =
+            data.image;
 
 
         }
 
 
-    }
+
+    });
 
 
-};
-
-
-
-
+}
 
 
 
+loadVehicles();
 // ==========================================
 // OPEN ADMIN PANEL
 // ==========================================
@@ -98,21 +165,17 @@ const cards = document.querySelectorAll(".card");
 cards.forEach(card => {
 
 
-
     card.addEventListener("click", function(){
 
 
-
         selectedCard = card;
-
 
 
         let id = card.dataset.id;
 
 
 
-
-        // Load current information
+        // Load current vehicle information
 
 
         vehicleName.value =
@@ -135,19 +198,15 @@ cards.forEach(card => {
 
 
 
-
         vehicleImage.value =
         document.getElementById(`image${id}`).src || "";
-
 
 
 
         adminOverlay.style.display = "flex";
 
 
-
     });
-
 
 
 });
@@ -157,13 +216,12 @@ cards.forEach(card => {
 
 
 
-
 // ==========================================
-// SAVE BUTTON
+// SAVE BUTTON - FIREBASE
 // ==========================================
 
 
-saveBtn.addEventListener("click", function(){
+saveBtn.addEventListener("click", async function(){
 
 
 
@@ -175,9 +233,7 @@ saveBtn.addEventListener("click", function(){
 
 
 
-
     let id = selectedCard.dataset.id;
-
 
 
 
@@ -187,7 +243,6 @@ saveBtn.addEventListener("click", function(){
 
     document.getElementById(`name${id}`).innerText =
     vehicleName.value;
-
 
 
 
@@ -218,14 +273,51 @@ saveBtn.addEventListener("click", function(){
 
 
 
-    // Update image
+
+    // ==========================================
+    // IMAGE UPLOAD
+    // ==========================================
 
 
-    if(vehicleImage.value.trim() !== ""){
+    let imageURL = vehicleImage.value;
+
+
+
+    const imageUpload =
+    document.getElementById("imageUpload");
+
+
+
+    if(imageUpload && imageUpload.files[0]){
+
+
+        let imageFile =
+        imageUpload.files[0];
+
+
+
+        let imageRef =
+        ref(
+            storage,
+            "cars/" + Date.now() + "-" + imageFile.name
+        );
+
+
+
+        await uploadBytes(
+            imageRef,
+            imageFile
+        );
+
+
+
+        imageURL =
+        await getDownloadURL(imageRef);
+
 
 
         document.getElementById(`image${id}`).src =
-        vehicleImage.value;
+        imageURL;
 
 
     }
@@ -234,7 +326,9 @@ saveBtn.addEventListener("click", function(){
 
 
 
-    // Save to local storage
+    // ==========================================
+    // SAVE TO FIRESTORE
+    // ==========================================
 
 
     let vehicleData = {
@@ -249,7 +343,7 @@ saveBtn.addEventListener("click", function(){
         demand: vehicleDemand.value,
 
 
-        image: vehicleImage.value
+        image: imageURL
 
 
     };
@@ -257,22 +351,23 @@ saveBtn.addEventListener("click", function(){
 
 
 
+    await setDoc(
 
-    localStorage.setItem(
+        doc(db,"vehicles",id),
 
-        "vehicle" + id,
-
-        JSON.stringify(vehicleData)
+        vehicleData
 
     );
 
 
 
 
+    console.log("Saved to Firebase");
 
 
 
-    // Close panel
+
+    // Close admin panel
 
 
     adminOverlay.style.display = "none";
@@ -283,14 +378,6 @@ saveBtn.addEventListener("click", function(){
 
 
 });
-
-
-
-
-
-
-
-
 // ==========================================
 // CANCEL BUTTON
 // ==========================================
@@ -299,12 +386,10 @@ saveBtn.addEventListener("click", function(){
 cancelBtn.addEventListener("click", function(){
 
 
-
     adminOverlay.style.display = "none";
 
 
     selectedCard = null;
-
 
 
 });
@@ -315,14 +400,12 @@ cancelBtn.addEventListener("click", function(){
 
 
 
-
 // ==========================================
-// CLICK OUTSIDE CLOSE
+// CLICK OUTSIDE ADMIN PANEL CLOSE
 // ==========================================
 
 
 adminOverlay.addEventListener("click", function(event){
-
 
 
     if(event.target === adminOverlay){
@@ -338,22 +421,16 @@ adminOverlay.addEventListener("click", function(event){
 
 
 });
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCzyyZcuQsR19fsHnffGV0L2LCQ-RRuaGw",
-    authDomain: "admin-pannel-268a9.firebaseapp.com",
-    projectId: "admin-pannel-268a9",
-    storageBucket: "admin-pannel-268a9.firebasestorage.app",
-    messagingSenderId: "619934011757",
-    appId: "1:619934011757:web:8b4b98362df5f932fc0a64"
-  };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+
+
+
+
+
+// ==========================================
+// FINISHED
+// ==========================================
+
+
+console.log("Car Values Admin System Loaded");
