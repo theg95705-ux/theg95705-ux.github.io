@@ -78,14 +78,11 @@ const githubProvider = new GithubAuthProvider();
 
 
 
-
 // ==========================================
 // ADMIN SECURITY
 // ==========================================
 
-
-// Your GitHub ID
-// We will confirm Firebase UID after login
+// Your GitHub account ID
 
 const adminUID = "304339676";
 
@@ -179,23 +176,6 @@ if(githubLogin){
                 console.log(
                     "GitHub Login Successful"
                 );
-                const result = await signInWithPopup(
-    auth,
-    githubProvider
-);
-
-
-console.log("Firebase UID:", result.user.uid);
-
-console.log(
-    "GitHub UID:",
-    result.user.providerData[0].uid
-);
-
-console.log(
-    "Email:",
-    result.user.email
-
 
 
                 console.log(
@@ -204,12 +184,16 @@ console.log(
                 );
 
 
-
                 console.log(
                     "GitHub ID:",
-                    result.user.providerData[0].uid
+                    result.user.providerData[0]?.uid
                 );
 
+
+                console.log(
+                    "Email:",
+                    result.user.email
+                );
 
 
             }
@@ -237,8 +221,6 @@ console.log(
 
 
 
-
-
 // ==========================================
 // CHECK ADMIN LOGIN
 // ==========================================
@@ -252,25 +234,20 @@ onAuthStateChanged(
         if(user){
 
 
+            const githubID =
+            user.providerData[0]?.uid;
+
+
+
             console.log(
-                "Logged in user:",
-                user.uid
+                "Logged in GitHub ID:",
+                githubID
             );
 
-
-            console.log(
-                "Provider ID:",
-                user.providerData[0]?.uid
-            );
-
-
-
-            // TEMPORARY CHECK
-            // Change after we confirm UID
 
 
             if(
-                user.providerData[0]?.uid == adminUID
+                githubID === adminUID
             ){
 
 
@@ -389,12 +366,13 @@ async function loadVehicles(){
 
 
 
-            if(nameElement && data.name){
-
+            if(
+                nameElement &&
+                data.name
+            ){
 
                 nameElement.innerText =
                 data.name;
-
 
             }
 
@@ -403,15 +381,16 @@ async function loadVehicles(){
 
 
 
-            if(valueElement && data.value){
-
+            if(
+                valueElement &&
+                data.value
+            ){
 
                 valueElement.innerText =
                 "$" +
                 Number(data.value)
                 .toLocaleString();
 
-
             }
 
 
@@ -419,13 +398,14 @@ async function loadVehicles(){
 
 
 
-            if(demandElement && data.demand){
-
+            if(
+                demandElement &&
+                data.demand
+            ){
 
                 demandElement.innerText =
                 data.demand +
                 "/10";
-
 
             }
 
@@ -439,16 +419,15 @@ async function loadVehicles(){
                 data.image
             ){
 
-
                 imageElement.src =
                 data.image;
-
 
             }
 
 
 
         });
+
 
 
 
@@ -478,16 +457,12 @@ async function loadVehicles(){
 
 
 
-// Load saved vehicles on page start
+// ==========================================
+// LOAD SAVED DATA ON START
+// ==========================================
+
 
 loadVehicles();
-
-
-
-
-
-
-
 // ==========================================
 // OPEN ADMIN PANEL
 // ==========================================
@@ -544,6 +519,7 @@ cards.forEach(
 
 
 
+
                 const name =
                 document.getElementById(
                     `name${id}`
@@ -566,7 +542,6 @@ cards.forEach(
                 document.getElementById(
                     `image${id}`
                 );
-
 
 
 
@@ -637,7 +612,6 @@ cards.forEach(
 
 
 
-
                 if(adminOverlay){
 
 
@@ -649,13 +623,18 @@ cards.forEach(
 
 
 
-
             }
         );
 
 
     }
 );
+
+
+
+
+
+
 // ==========================================
 // SAVE VEHICLE BUTTON
 // ==========================================
@@ -686,6 +665,8 @@ if(saveBtn){
 
 
 
+
+
             if(!selectedCard){
 
 
@@ -704,8 +685,11 @@ if(saveBtn){
 
 
 
+
+
             const id =
             selectedCard.dataset.id;
+
 
 
 
@@ -735,6 +719,7 @@ if(saveBtn){
 
 
 
+
             if(
                 imageUpload &&
                 imageUpload.files.length > 0
@@ -746,6 +731,7 @@ if(saveBtn){
 
                     const imageFile =
                     imageUpload.files[0];
+
 
 
 
@@ -762,10 +748,12 @@ if(saveBtn){
 
 
 
+
                     await uploadBytes(
                         imageRef,
                         imageFile
                     );
+
 
 
 
@@ -809,7 +797,7 @@ if(saveBtn){
 
 
             // ==================================
-            // UPDATE WEBSITE
+            // UPDATE PAGE
             // ==================================
 
 
@@ -862,6 +850,7 @@ if(saveBtn){
 
 
 
+
             if(valueElement){
 
 
@@ -878,6 +867,7 @@ if(saveBtn){
 
 
 
+
             if(demandElement){
 
 
@@ -887,6 +877,7 @@ if(saveBtn){
 
 
             }
+
 
 
 
@@ -941,8 +932,8 @@ if(saveBtn){
                 imageURL
 
 
-
             };
+
 
 
 
@@ -966,6 +957,7 @@ if(saveBtn){
                     vehicleData
 
                 );
+
 
 
 
@@ -994,7 +986,6 @@ if(saveBtn){
 
 
 
-
             if(adminOverlay){
 
 
@@ -1003,6 +994,8 @@ if(saveBtn){
 
 
             }
+
+
 
 
 
@@ -1130,6 +1123,12 @@ console.log(
 
 console.log(
     "GitHub Authentication Enabled"
+);
+
+
+console.log(
+    "Admin UID:",
+    adminUID
 );
 
 
