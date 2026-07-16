@@ -4,6 +4,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
+
 import {
     getFirestore,
     collection,
@@ -19,6 +20,16 @@ import {
     uploadBytes,
     getDownloadURL
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+
+
+// AUTH IMPORT
+
+import {
+    getAuth,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+
 
 
 
@@ -54,6 +65,57 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 
+const auth = getAuth(app);
+
+
+
+
+
+// ==========================================
+// ADMIN SECURITY
+// ==========================================
+
+
+let isAdmin = false;
+
+
+
+onAuthStateChanged(auth, (user)=>{
+
+
+    if(user){
+
+
+        isAdmin = true;
+
+
+        console.log("Admin logged in:", user.email);
+
+
+    }
+
+    else{
+
+
+        isAdmin = false;
+
+
+        console.log("No admin login");
+
+
+        if(adminOverlay){
+
+            adminOverlay.style.display = "none";
+
+        }
+
+
+    }
+
+
+});
+
+
 
 
 
@@ -63,10 +125,6 @@ const storage = getStorage(app);
 
 
 let selectedCard = null;
-
-
-
-
 // ==========================================
 // GET ELEMENTS
 // ==========================================
@@ -96,6 +154,8 @@ const cancelBtn = document.getElementById("cancelBtn");
 
 
 
+
+
 // ==========================================
 // LOAD VEHICLES FROM FIREBASE
 // ==========================================
@@ -109,6 +169,7 @@ async function loadVehicles(){
     );
 
 
+
     snapshot.forEach((item)=>{
 
 
@@ -119,25 +180,57 @@ async function loadVehicles(){
 
 
 
-        document.getElementById(`name${id}`).innerText =
-        data.name;
+
+        const nameElement =
+        document.getElementById(`name${id}`);
+
+
+        const valueElement =
+        document.getElementById(`value${id}`);
+
+
+        const demandElement =
+        document.getElementById(`demand${id}`);
+
+
+        const imageElement =
+        document.getElementById(`image${id}`);
 
 
 
-        document.getElementById(`value${id}`).innerText =
-        "$" + Number(data.value).toLocaleString();
+
+        if(nameElement){
+
+            nameElement.innerText =
+            data.name;
+
+        }
 
 
 
-        document.getElementById(`demand${id}`).innerText =
-        data.demand + "/10";
+        if(valueElement){
+
+            valueElement.innerText =
+            "$" + Number(data.value).toLocaleString();
+
+        }
 
 
 
-        if(data.image){
+        if(demandElement){
+
+            demandElement.innerText =
+            data.demand + "/10";
+
+        }
 
 
-            document.getElementById(`image${id}`).src =
+
+
+        if(imageElement && data.image){
+
+
+            imageElement.src =
             data.image;
 
 
@@ -148,13 +241,22 @@ async function loadVehicles(){
     });
 
 
+
 }
 
 
 
 loadVehicles();
+
+
+
+
+
+
+
+
 // ==========================================
-// OPEN ADMIN PANEL
+// OPEN ADMIN PANEL (ADMIN ONLY)
 // ==========================================
 
 
@@ -165,21 +267,46 @@ const cards = document.querySelectorAll(".card");
 cards.forEach(card => {
 
 
+
     card.addEventListener("click", function(){
 
 
+
+        // BLOCK NORMAL USERS
+
+        if(!isAdmin){
+
+
+            console.log("Admin access denied");
+
+
+            return;
+
+
+        }
+
+
+
+
+
         selectedCard = card;
+
 
 
         let id = card.dataset.id;
 
 
 
+
+
+
         // Load current vehicle information
+
 
 
         vehicleName.value =
         document.getElementById(`name${id}`).innerText;
+
 
 
 
@@ -191,10 +318,14 @@ cards.forEach(card => {
 
 
 
+
+
         vehicleDemand.value =
         document.getElementById(`demand${id}`)
         .innerText
         .replace("/10","");
+
+
 
 
 
@@ -203,25 +334,40 @@ cards.forEach(card => {
 
 
 
+
+
+
         adminOverlay.style.display = "flex";
+
 
 
     });
 
 
+
 });
-
-
-
-
-
-
 // ==========================================
-// SAVE BUTTON - FIREBASE
+// SAVE BUTTON - ADMIN ONLY
 // ==========================================
 
 
 saveBtn.addEventListener("click", async function(){
+
+
+
+    // BLOCK UNAUTHORISED USERS
+
+    if(!isAdmin){
+
+
+        console.log("Save blocked");
+
+
+        return;
+
+
+    }
+
 
 
 
@@ -233,12 +379,16 @@ saveBtn.addEventListener("click", async function(){
 
 
 
+
     let id = selectedCard.dataset.id;
 
 
 
 
-    // Update name
+
+    // ==========================================
+    // UPDATE WEBSITE DISPLAY
+    // ==========================================
 
 
     document.getElementById(`name${id}`).innerText =
@@ -247,12 +397,10 @@ saveBtn.addEventListener("click", async function(){
 
 
 
-    // Update value
-
-
     let formattedValue =
     Number(vehicleValue.value)
     .toLocaleString();
+
 
 
 
@@ -263,11 +411,10 @@ saveBtn.addEventListener("click", async function(){
 
 
 
-    // Update demand
-
-
     document.getElementById(`demand${id}`).innerText =
     vehicleDemand.value + "/10";
+
+
 
 
 
@@ -288,7 +435,9 @@ saveBtn.addEventListener("click", async function(){
 
 
 
+
     if(imageUpload && imageUpload.files[0]){
+
 
 
         let imageFile =
@@ -320,7 +469,10 @@ saveBtn.addEventListener("click", async function(){
         imageURL;
 
 
+
     }
+
+
 
 
 
@@ -351,6 +503,7 @@ saveBtn.addEventListener("click", async function(){
 
 
 
+
     await setDoc(
 
         doc(db,"vehicles",id),
@@ -362,12 +515,11 @@ saveBtn.addEventListener("click", async function(){
 
 
 
-    console.log("Saved to Firebase");
+
+    console.log("Vehicle saved!");
 
 
 
-
-    // Close admin panel
 
 
     adminOverlay.style.display = "none";
@@ -378,6 +530,15 @@ saveBtn.addEventListener("click", async function(){
 
 
 });
+
+
+
+
+
+
+
+
+
 // ==========================================
 // CANCEL BUTTON
 // ==========================================
@@ -386,10 +547,12 @@ saveBtn.addEventListener("click", async function(){
 cancelBtn.addEventListener("click", function(){
 
 
+
     adminOverlay.style.display = "none";
 
 
     selectedCard = null;
+
 
 
 });
@@ -400,21 +563,26 @@ cancelBtn.addEventListener("click", function(){
 
 
 
+
+
 // ==========================================
-// CLICK OUTSIDE ADMIN PANEL CLOSE
+// CLICK OUTSIDE CLOSE
 // ==========================================
 
 
 adminOverlay.addEventListener("click", function(event){
 
 
+
     if(event.target === adminOverlay){
+
 
 
         adminOverlay.style.display = "none";
 
 
         selectedCard = null;
+
 
 
     }
