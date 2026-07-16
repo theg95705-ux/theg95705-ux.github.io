@@ -1,6 +1,6 @@
 // ==========================================
 // VEHICLE ADMIN SYSTEM
-// UPDATED VERSION
+// FULL UPDATED VERSION
 // PART 1 - FIREBASE SETUP & AUTH
 // ==========================================
 
@@ -78,16 +78,25 @@ const firebaseConfig = {
 // START FIREBASE
 // ==========================================
 
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
-const storage = getStorage(app);
-
-const auth = getAuth(app);
+const app =
+initializeApp(firebaseConfig);
 
 
-console.log("Firebase Connected");
+const db =
+getFirestore(app);
+
+
+const storage =
+getStorage(app);
+
+
+const auth =
+getAuth(app);
+
+
+console.log(
+"Firebase Connected"
+);
 
 
 
@@ -97,6 +106,7 @@ console.log("Firebase Connected");
 
 const ADMIN_EMAIL =
 "theg95705@gmail.com".toLowerCase();
+
 
 
 let isAdmin = false;
@@ -112,65 +122,95 @@ let selectedCard = null;
 // ==========================================
 
 const adminOverlay =
-document.getElementById("adminOverlay");
+document.getElementById(
+"adminOverlay"
+);
 
 
 const loginOverlay =
-document.getElementById("loginOverlay");
+document.getElementById(
+"loginOverlay"
+);
 
 
 const loginEmail =
-document.getElementById("loginEmail");
+document.getElementById(
+"loginEmail"
+);
 
 
 const loginPassword =
-document.getElementById("loginPassword");
+document.getElementById(
+"loginPassword"
+);
 
 
 const loginBtn =
-document.getElementById("loginBtn");
+document.getElementById(
+"loginBtn"
+);
 
 
 const loginCancelBtn =
-document.getElementById("loginCancelBtn");
+document.getElementById(
+"loginCancelBtn"
+);
 
 
 const loginError =
-document.getElementById("loginError");
+document.getElementById(
+"loginError"
+);
 
 
 
 const vehicleName =
-document.getElementById("vehicleName");
+document.getElementById(
+"vehicleName"
+);
 
 
 const vehicleValue =
-document.getElementById("vehicleValue");
+document.getElementById(
+"vehicleValue"
+);
 
 
 const vehicleDemand =
-document.getElementById("vehicleDemand");
+document.getElementById(
+"vehicleDemand"
+);
 
 
 const vehicleImage =
-document.getElementById("vehicleImage");
+document.getElementById(
+"vehicleImage"
+);
 
 
 const imageUpload =
-document.getElementById("imageUpload");
+document.getElementById(
+"imageUpload"
+);
 
 
 
 const saveBtn =
-document.getElementById("saveBtn");
+document.getElementById(
+"saveBtn"
+);
 
 
 const cancelBtn =
-document.getElementById("cancelBtn");
+document.getElementById(
+"cancelBtn"
+);
 
 
 
-console.log("HTML Loaded");
+console.log(
+"HTML Loaded"
+);
 
 
 
@@ -178,7 +218,9 @@ console.log("HTML Loaded");
 // FIREBASE AUTH STATE
 // ==========================================
 
-onAuthStateChanged(auth, (user)=>{
+onAuthStateChanged(
+auth,
+(user)=>{
 
 
     currentUser = user;
@@ -238,21 +280,32 @@ onAuthStateChanged(auth, (user)=>{
 
 
         console.log(
+        "Admin editing enabled"
+        );
+
+
+        console.log(
+        "Click a vehicle to edit"
+        );
+
+
+        console.log(
         "================================="
         );
 
 
-
-        // If a vehicle was selected before login
         if(selectedCard){
 
-            openVehicleEditor(selectedCard);
+            openVehicleEditor(
+            selectedCard
+            );
 
         }
 
 
 
-    } else {
+    }
+    else{
 
 
         isAdmin = false;
@@ -287,7 +340,8 @@ async ()=>{
 
 
     const email =
-    loginEmail.value.trim();
+    loginEmail.value.trim()
+    .toLowerCase();
 
 
 
@@ -300,7 +354,7 @@ async ()=>{
 
 
         loginError.textContent =
-        "Enter email and password.";
+        "Enter your email and password.";
 
 
         loginError.style.display =
@@ -334,6 +388,12 @@ async ()=>{
 
 
 
+        console.log(
+        "Login successful"
+        );
+
+
+
         loginEmail.value =
         "";
 
@@ -343,9 +403,8 @@ async ()=>{
 
 
 
-        loginOverlay.style.display =
-        "none";
-
+        // DO NOT OPEN PANEL HERE
+        // Firebase auth state will handle it
 
 
     }
@@ -362,16 +421,18 @@ async ()=>{
 
 
 
-        if(error.code === "auth/invalid-credential"){
+        if(
+            error.code ===
+            "auth/invalid-credential"
+        ){
 
 
             loginError.textContent =
-            "Incorrect email or password.";
+            "Wrong email or password.";
 
 
         }
-
-        else {
+        else{
 
 
             loginError.textContent =
@@ -432,7 +493,7 @@ loginCancelBtn.addEventListener(
 
 
 // ==========================================
-// CLOSE LOGIN OUTSIDE CLICK
+// CLICK OUTSIDE LOGIN
 // ==========================================
 
 loginOverlay.addEventListener(
@@ -499,9 +560,8 @@ document.addEventListener(
     ){
 
 
-
         console.log(
-        "Admin login opened"
+        "Opening Admin Login"
         );
 
 
@@ -512,7 +572,6 @@ document.addEventListener(
 
 
         loginEmail.focus();
-
 
 
     }
@@ -555,8 +614,8 @@ document.addEventListener(
 
 
 // ==========================================
-// VEHICLE CARDS
-// NOW DISPLAY ONLY
+// VEHICLE CARD CLICK SYSTEM
+// ONLY ADMINS CAN EDIT
 // ==========================================
 
 document
@@ -569,21 +628,40 @@ document
     ()=>{
 
 
-        console.log(
-        "Vehicle viewed:",
-        card.dataset.id
-        );
+        if(isAdmin){
 
 
-        // No admin login here anymore
+            openVehicleEditor(
+            card
+            );
+
+
+        }
+        else{
+
+
+            console.log(
+            "Not admin - vehicle view only"
+            );
+
+
+        }
 
 
     });
 
 
 });
+
+
+
+
+
+console.log(
+"Login System Ready"
+);
 // ==========================================
-// PART 3 - VEHICLE SYSTEM & SAVE
+// PART 3 - VEHICLE LOADING, EDITOR & SAVE
 // ==========================================
 
 
@@ -599,12 +677,16 @@ async function loadVehicles(){
 
         const snapshot =
         await getDocs(
-            collection(db,"vehicles")
+            collection(
+                db,
+                "vehicles"
+            )
         );
 
 
 
-        snapshot.forEach((vehicle)=>{
+        snapshot.forEach(
+        (vehicle)=>{
 
 
             const id =
@@ -644,7 +726,8 @@ async function loadVehicles(){
             if(name){
 
                 name.textContent =
-                data.name || "Car Name";
+                data.name ||
+                "Car Name";
 
             }
 
@@ -655,7 +738,7 @@ async function loadVehicles(){
                 value.textContent =
                 "$" +
                 Number(
-                data.value || 0
+                    data.value || 0
                 )
                 .toLocaleString();
 
@@ -681,6 +764,7 @@ async function loadVehicles(){
             }
 
 
+
         });
 
 
@@ -697,7 +781,7 @@ async function loadVehicles(){
 
 
         console.error(
-        "Loading Vehicles Failed:",
+        "Vehicle Load Error:",
         error
         );
 
@@ -709,12 +793,6 @@ async function loadVehicles(){
 
 
 
-// Load vehicles
-
-loadVehicles();
-
-
-
 
 
 // ==========================================
@@ -722,6 +800,21 @@ loadVehicles();
 // ==========================================
 
 function openVehicleEditor(card){
+
+
+    if(!isAdmin){
+
+
+        console.log(
+        "Not admin"
+        );
+
+
+        return;
+
+
+    }
+
 
 
     selectedCard =
@@ -760,7 +853,9 @@ function openVehicleEditor(card){
 
 
     vehicleName.value =
-    name ? name.textContent : "";
+    name ?
+    name.textContent :
+    "";
 
 
 
@@ -802,7 +897,6 @@ function openVehicleEditor(card){
 
 
 }
-
 
 
 
@@ -851,7 +945,6 @@ async ()=>{
     true;
 
 
-
     saveBtn.textContent =
     "Saving...";
 
@@ -872,7 +965,9 @@ async ()=>{
 
 
 
+        // ===============================
         // IMAGE UPLOAD
+        // ===============================
 
         if(
             imageUpload.files &&
@@ -882,6 +977,12 @@ async ()=>{
 
             const file =
             imageUpload.files[0];
+
+
+
+            console.log(
+            "Uploading image..."
+            );
 
 
 
@@ -899,15 +1000,21 @@ async ()=>{
 
 
             await uploadBytes(
-            imageRef,
-            file
+                imageRef,
+                file
             );
 
 
 
             imageURL =
             await getDownloadURL(
-            imageRef
+                imageRef
+            );
+
+
+
+            console.log(
+            "Image uploaded"
             );
 
 
@@ -926,13 +1033,13 @@ async ()=>{
 
             value:
             Number(
-            vehicleValue.value
+                vehicleValue.value
             ),
 
 
             demand:
             Number(
-            vehicleDemand.value
+                vehicleDemand.value
             ),
 
 
@@ -949,9 +1056,9 @@ async ()=>{
         await setDoc(
 
             doc(
-            db,
-            "vehicles",
-            id
+                db,
+                "vehicles",
+                id
             ),
 
             vehicleData
@@ -961,15 +1068,15 @@ async ()=>{
 
 
         console.log(
-        "Saved:",
-        vehicleData
+        "Vehicle saved:",
+        id
         );
 
 
 
 
 
-        // UPDATE SCREEN
+        // UPDATE DISPLAY
 
 
         document.getElementById(
@@ -1010,6 +1117,7 @@ async ()=>{
 
 
 
+
         adminOverlay.style.display =
         "none";
 
@@ -1024,12 +1132,11 @@ async ()=>{
 
 
         alert(
-        "Vehicle Saved!"
+        "Vehicle saved!"
         );
 
 
     }
-
 
 
     catch(error){
@@ -1059,8 +1166,21 @@ async ()=>{
 
 
 });
+
+
+
+
+
+// Initial vehicle load
+
+loadVehicles();
+
+
+console.log(
+"Vehicle System Ready"
+);
 // ==========================================
-// PART 4 - FINAL SYSTEM
+// PART 4 - FINAL CONTROLS, DEBUG & STARTUP
 // ==========================================
 
 
@@ -1121,7 +1241,7 @@ adminOverlay.addEventListener(
 
 
 // ==========================================
-// LOGOUT ADMIN
+// LOGOUT FUNCTION
 // ==========================================
 
 async function logoutAdmin(){
@@ -1131,6 +1251,7 @@ async function logoutAdmin(){
 
 
         await signOut(auth);
+
 
 
         isAdmin =
@@ -1151,6 +1272,7 @@ async function logoutAdmin(){
         );
 
 
+
     }
 
 
@@ -1158,7 +1280,7 @@ async function logoutAdmin(){
 
 
         console.error(
-        "Logout failed:",
+        "Logout Error:",
         error
         );
 
@@ -1170,10 +1292,6 @@ async function logoutAdmin(){
 
 
 
-
-
-// Make logout available in console
-
 window.logoutAdmin =
 logoutAdmin;
 
@@ -1182,140 +1300,9 @@ logoutAdmin;
 
 
 // ==========================================
-// AUTO RELOAD VEHICLES AFTER LOGIN
-// ==========================================
-
-onAuthStateChanged(
-auth,
-(user)=>{
-
-
-    if(user){
-
-
-        console.log(
-        "User authenticated:",
-        user.email
-        );
-
-
-        loadVehicles();
-
-
-    }
-
-
-});
-
-
-
-
-
-// ==========================================
-// PAGE STARTUP
-// ==========================================
-
-window.addEventListener(
-"load",
-()=>{
-
-
-    console.log(
-    "================================="
-    );
-
-
-    console.log(
-    "Vehicle Admin System Loaded"
-    );
-
-
-    console.log(
-    "Admin:",
-    ADMIN_EMAIL
-    );
-
-
-    console.log(
-    "Ready"
-    );
-
-
-    console.log(
-    "================================="
-    );
-
-
-});
-
-
-
-
-
-// ==========================================
-// ERROR LOGGER
-// ==========================================
-
-window.addEventListener(
-"error",
-(event)=>{
-
-
-    console.error(
-    "JavaScript Error:"
-    );
-
-
-    console.error(
-    event.message
-    );
-
-
-    console.error(
-    "File:",
-    event.filename
-    );
-
-
-    console.error(
-    "Line:",
-    event.lineno
-    );
-
-
-});
-
-
-
-
-
-// ==========================================
-// PROMISE ERROR LOGGER
-// ==========================================
-
-window.addEventListener(
-"unhandledrejection",
-(event)=>{
-
-
-    console.error(
-    "Promise Error:"
-    );
-
-
-    console.error(
-    event.reason
-    );
-
-
-});
-
-
-
-
-
-// ==========================================
-// ADMIN DEBUG TOOL
+// DEBUG COMMAND
+// USE IN CONSOLE:
+// debugAdmin()
 // ==========================================
 
 window.debugAdmin =
@@ -1352,7 +1339,7 @@ window.debugAdmin =
 
 
     console.log(
-    "Selected Card:",
+    "Selected Vehicle:",
     selectedCard
     );
 
@@ -1363,6 +1350,177 @@ window.debugAdmin =
 
 
 };
+
+
+
+
+
+// ==========================================
+// AUTH STATE RECHECK
+// ==========================================
+
+onAuthStateChanged(
+auth,
+(user)=>{
+
+
+    currentUser =
+    user;
+
+
+
+    if(user){
+
+
+        console.log(
+        "Session active:",
+        user.email
+        );
+
+
+        if(
+            user.email &&
+            user.email.toLowerCase()
+            === ADMIN_EMAIL
+        ){
+
+
+            isAdmin =
+            true;
+
+
+
+            console.log(
+            "Admin session restored"
+            );
+
+
+        }
+
+
+        loadVehicles();
+
+
+    }
+    else{
+
+
+        isAdmin =
+        false;
+
+
+
+        console.log(
+        "No active session"
+        );
+
+
+    }
+
+
+});
+
+
+
+
+
+// ==========================================
+// PAGE LOAD MESSAGE
+// ==========================================
+
+window.addEventListener(
+"load",
+()=>{
+
+
+    console.log(
+    "================================="
+    );
+
+
+    console.log(
+    "Vehicle Admin System Loaded"
+    );
+
+
+    console.log(
+    "Admin Shortcut:"
+    );
+
+
+    console.log(
+    "CTRL + ALT + RIGHT ARROW"
+    );
+
+
+    console.log(
+    "================================="
+    );
+
+
+});
+
+
+
+
+
+// ==========================================
+// GLOBAL ERROR HANDLER
+// ==========================================
+
+window.addEventListener(
+"error",
+(event)=>{
+
+
+    console.error(
+    "JavaScript Error:"
+    );
+
+
+    console.error(
+    event.message
+    );
+
+
+    console.error(
+    "File:",
+    event.filename
+    );
+
+
+    console.error(
+    "Line:",
+    event.lineno
+    );
+
+
+});
+
+
+
+
+
+// ==========================================
+// PROMISE ERROR HANDLER
+// ==========================================
+
+window.addEventListener(
+"unhandledrejection",
+(event)=>{
+
+
+    console.error(
+    "Unhandled Promise:"
+    );
+
+
+    console.error(
+    event.reason
+    );
+
+
+});
 
 
 
