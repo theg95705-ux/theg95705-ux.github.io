@@ -6,11 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Car Values</title>
+    <title>Vehicle Values</title>
 
-    <meta name="description" content="Track vehicle values and demand.">
+    <meta name="description" content="Vehicle Values List">
 
-    <!-- Google Fonts -->
+    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -27,53 +27,100 @@
 HEADER
 ========================================== -->
 
-<header>
+<header class="header">
 
     <div class="logo">
-        Car <span>Values</span>
+
+        Vehicle <span>Values</span>
+
     </div>
 
     <nav>
+
         <a href="index.html">Home</a>
         <a href="#">Vehicles</a>
         <a href="#">Updates</a>
         <a href="#">About</a>
+
     </nav>
+
+    <!-- Hidden until admin logs in -->
+
+    <button
+        id="logoutBtn"
+        class="logout-btn"
+        style="display:none;">
+
+        Log Out
+
+    </button>
 
 </header>
 
 <!-- ==========================================
-PAGE HEADER
+PAGE TITLE
 ========================================== -->
 
-<section class="page-header">
+<section class="page-title">
 
-    <a href="index.html" class="back-btn">
-        &#8592;
-    </a>
+    <h1>
+
+        Vehicle Collection
+
+    </h1>
+
+    <p>
+
+        Track every vehicle's value, demand and rarity.
+
+    </p>
 
 </section>
 
 <!-- ==========================================
-VEHICLES
+VEHICLE GRID
 ========================================== -->
 
 <main class="cards">
 
 <!-- ==========================================
-VEHICLE 1
+VEHICLE CARD 1
 ========================================== -->
 
-<div class="card" data-id="1">
+<div
+    class="card"
+    data-id="1">
+
+    <!-- Limited Badge -->
+
+    <div
+        class="limited-badge"
+        id="limitedBadge1"
+        style="display:none;">
+
+        ★ LIMITED
+
+    </div>
+
+    <!-- Vehicle Image -->
 
     <div class="vehicle-image">
-        <img id="image1" src="" alt="Vehicle">
+
+        <img
+            id="image1"
+            src=""
+            alt="Vehicle">
+
     </div>
+
+    <!-- Vehicle Name -->
 
     <div class="vehicle-name-box">
 
         <span class="name-title">
-            Name
+
+            NAME
+
         </span>
 
         <span
@@ -86,14 +133,18 @@ VEHICLE 1
 
     </div>
 
-    <div class="stat-box demand">
+    <!-- Demand -->
+
+    <div class="stat-box">
 
         <span class="stat-title">
+
             Demand
+
         </span>
 
         <span
-            class="stat-value"
+            class="demand-value"
             id="demand1">
 
             8/10
@@ -102,14 +153,18 @@ VEHICLE 1
 
     </div>
 
-    <div class="stat-box value">
+    <!-- Value -->
+
+    <div class="stat-box">
 
         <span class="stat-title">
+
             Value
+
         </span>
 
         <span
-            class="stat-value"
+            class="value-text"
             id="value1">
 
             $125,000
@@ -120,148 +175,193 @@ VEHICLE 1
 
 </div>
 <!-- ==========================================
-VEHICLE 2
+VEHICLE CARD 2
 ========================================== -->
 
 <div class="card" data-id="2">
+
+    <div
+        class="limited-badge"
+        id="limitedBadge2"
+        style="display:none;">
+
+        ★ LIMITED
+
+    </div>
 
     <div class="vehicle-image">
         <img id="image2" src="" alt="Vehicle">
     </div>
 
     <div class="vehicle-name-box">
-        <span class="name-title">Name</span>
+        <span class="name-title">NAME</span>
         <span class="name-value" id="name2">Car Name</span>
     </div>
 
-    <div class="stat-box demand">
+    <div class="stat-box">
         <span class="stat-title">Demand</span>
-        <span class="stat-value" id="demand2">8/10</span>
+        <span class="demand-value" id="demand2">8/10</span>
     </div>
 
-    <div class="stat-box value">
+    <div class="stat-box">
         <span class="stat-title">Value</span>
-        <span class="stat-value" id="value2">$125,000</span>
+        <span class="value-text" id="value2">$125,000</span>
     </div>
 
 </div>
 
 <!-- ==========================================
-VEHICLE 3
+VEHICLE CARD 3
 ========================================== -->
 
 <div class="card" data-id="3">
+
+    <div
+        class="limited-badge"
+        id="limitedBadge3"
+        style="display:none;">
+
+        ★ LIMITED
+
+    </div>
 
     <div class="vehicle-image">
         <img id="image3" src="" alt="Vehicle">
     </div>
 
     <div class="vehicle-name-box">
-        <span class="name-title">Name</span>
+        <span class="name-title">NAME</span>
         <span class="name-value" id="name3">Car Name</span>
     </div>
 
-    <div class="stat-box demand">
+    <div class="stat-box">
         <span class="stat-title">Demand</span>
-        <span class="stat-value" id="demand3">8/10</span>
+        <span class="demand-value" id="demand3">8/10</span>
     </div>
 
-    <div class="stat-box value">
+    <div class="stat-box">
         <span class="stat-title">Value</span>
-        <span class="stat-value" id="value3">$125,000</span>
+        <span class="value-text" id="value3">$125,000</span>
     </div>
 
 </div>
 
 <!-- ==========================================
-VEHICLE 4
+VEHICLE CARD 4
 ========================================== -->
 
 <div class="card" data-id="4">
+
+    <div
+        class="limited-badge"
+        id="limitedBadge4"
+        style="display:none;">
+
+        ★ LIMITED
+
+    </div>
 
     <div class="vehicle-image">
         <img id="image4" src="" alt="Vehicle">
     </div>
 
     <div class="vehicle-name-box">
-        <span class="name-title">Name</span>
+        <span class="name-title">NAME</span>
         <span class="name-value" id="name4">Car Name</span>
     </div>
 
-    <div class="stat-box demand">
+    <div class="stat-box">
         <span class="stat-title">Demand</span>
-        <span class="stat-value" id="demand4">8/10</span>
+        <span class="demand-value" id="demand4">8/10</span>
     </div>
 
-    <div class="stat-box value">
+    <div class="stat-box">
         <span class="stat-title">Value</span>
-        <span class="stat-value" id="value4">$125,000</span>
+        <span class="value-text" id="value4">$125,000</span>
     </div>
 
 </div>
 
 <!-- ==========================================
-VEHICLE 5
+VEHICLE CARD 5
 ========================================== -->
 
 <div class="card" data-id="5">
+
+    <div
+        class="limited-badge"
+        id="limitedBadge5"
+        style="display:none;">
+
+        ★ LIMITED
+
+    </div>
 
     <div class="vehicle-image">
         <img id="image5" src="" alt="Vehicle">
     </div>
 
     <div class="vehicle-name-box">
-        <span class="name-title">Name</span>
+        <span class="name-title">NAME</span>
         <span class="name-value" id="name5">Car Name</span>
     </div>
 
-    <div class="stat-box demand">
+    <div class="stat-box">
         <span class="stat-title">Demand</span>
-        <span class="stat-value" id="demand5">8/10</span>
+        <span class="demand-value" id="demand5">8/10</span>
     </div>
 
-    <div class="stat-box value">
+    <div class="stat-box">
         <span class="stat-title">Value</span>
-        <span class="stat-value" id="value5">$125,000</span>
+        <span class="value-text" id="value5">$125,000</span>
     </div>
 
 </div>
 
 <!-- ==========================================
-VEHICLE 6
+VEHICLE CARD 6
 ========================================== -->
 
 <div class="card" data-id="6">
+
+    <div
+        class="limited-badge"
+        id="limitedBadge6"
+        style="display:none;">
+
+        ★ LIMITED
+
+    </div>
 
     <div class="vehicle-image">
         <img id="image6" src="" alt="Vehicle">
     </div>
 
     <div class="vehicle-name-box">
-        <span class="name-title">Name</span>
+        <span class="name-title">NAME</span>
         <span class="name-value" id="name6">Car Name</span>
     </div>
 
-    <div class="stat-box demand">
+    <div class="stat-box">
         <span class="stat-title">Demand</span>
-        <span class="stat-value" id="demand6">8/10</span>
+        <span class="demand-value" id="demand6">8/10</span>
     </div>
 
-    <div class="stat-box value">
+    <div class="stat-box">
         <span class="stat-title">Value</span>
-        <span class="stat-value" id="value6">$125,000</span>
+        <span class="value-text" id="value6">$125,000</span>
     </div>
 
 </div>
 
 </main>
 <!-- ==========================================
-LOGIN PANEL
+ADMIN LOGIN
 ========================================== -->
 
-<div class="admin-overlay" id="loginOverlay" style="display:none;">
+<div class="admin-overlay" id="loginOverlay">
 
-    <div class="admin-panel" id="loginPanel">
+    <div class="admin-panel">
 
         <h2 class="admin-title">
             Admin <span>Login</span>
@@ -269,25 +369,23 @@ LOGIN PANEL
 
         <div class="admin-group">
 
-            <label for="loginEmail">Email</label>
+            <label>Email</label>
 
             <input
                 type="email"
                 id="loginEmail"
-                placeholder="Enter your email"
-                autocomplete="username">
+                placeholder="Email">
 
         </div>
 
         <div class="admin-group">
 
-            <label for="loginPassword">Password</label>
+            <label>Password</label>
 
             <input
                 type="password"
                 id="loginPassword"
-                placeholder="Enter your password"
-                autocomplete="current-password">
+                placeholder="Password">
 
         </div>
 
@@ -322,22 +420,24 @@ LOGIN PANEL
 </div>
 
 <!-- ==========================================
-ADMIN EDIT PANEL
+ADMIN EDITOR
 ========================================== -->
 
-<div class="admin-overlay" id="adminOverlay" style="display:none;">
+<div class="admin-overlay" id="adminOverlay">
 
-    <div class="admin-panel" id="adminPanel">
+    <div class="admin-panel">
 
         <h2 class="admin-title">
+
             Edit <span>Vehicle</span>
+
         </h2>
+
+        <!-- Vehicle Name -->
 
         <div class="admin-group">
 
-            <label for="vehicleName">
-                Vehicle Name
-            </label>
+            <label>Vehicle Name</label>
 
             <input
                 type="text"
@@ -346,11 +446,11 @@ ADMIN EDIT PANEL
 
         </div>
 
+        <!-- Value -->
+
         <div class="admin-group">
 
-            <label for="vehicleValue">
-                Vehicle Value
-            </label>
+            <label>Vehicle Value</label>
 
             <input
                 type="number"
@@ -359,11 +459,11 @@ ADMIN EDIT PANEL
 
         </div>
 
+        <!-- Demand -->
+
         <div class="admin-group">
 
-            <label for="vehicleDemand">
-                Vehicle Demand
-            </label>
+            <label>Vehicle Demand</label>
 
             <select id="vehicleDemand">
 
@@ -377,36 +477,52 @@ ADMIN EDIT PANEL
                 <option value="3">3/10</option>
                 <option value="2">2/10</option>
                 <option value="1">1/10</option>
+                <option value="0">0/10</option>
 
             </select>
 
         </div>
 
+        <!-- Image URL -->
+
         <div class="admin-group">
 
-            <label for="vehicleImage">
-                Vehicle Image URL
-            </label>
+            <label>Vehicle Image URL</label>
 
             <input
                 type="text"
                 id="vehicleImage"
-                placeholder="https://example.com/car.jpg">
+                placeholder="https://example.com/car.png">
 
         </div>
+
+        <!-- Limited Toggle -->
 
         <div class="admin-group">
 
-            <label for="imageUpload">
-                Upload Image
-            </label>
+            <div class="limited-setting">
 
-            <input
-                type="file"
-                id="imageUpload"
-                accept="image/*">
+                <span>
+
+                    Limited Vehicle
+
+                </span>
+
+                <label class="switch">
+
+                    <input
+                        type="checkbox"
+                        id="vehicleLimited">
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
 
         </div>
+
+        <!-- Buttons -->
 
         <div class="button-row">
 
@@ -432,38 +548,13 @@ ADMIN EDIT PANEL
 
 </div>
 <!-- ==========================================
-ADMIN LOG OUT BUTTON
+END OF PAGE
 ========================================== -->
 
-<button
-    id="logoutBtn"
-    class="logout-btn"
-    style="
-        display:none;
-        position:fixed;
-        top:20px;
-        right:20px;
-        padding:12px 20px;
-        background:#d32f2f;
-        color:white;
-        border:none;
-        border-radius:8px;
-        cursor:pointer;
-        font-size:15px;
-        font-weight:bold;
-        z-index:9999;
-        box-shadow:0 4px 12px rgba(0,0,0,.25);
-    ">
-
-    🔒 Log Out
-
-</button>
-
-<!-- ==========================================
-JAVASCRIPT
-========================================== -->
+<!-- JavaScript -->
 
 <script type="module" src="script.js"></script>
 
 </body>
+
 </html>
