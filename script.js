@@ -1,12 +1,13 @@
 // ==========================================
-// VEHICLE ADMIN SYSTEM
-// PART 1 - FIREBASE SETUP & AUTH
+// VEHICLE VALUES
+// SCRIPT.JS
+// PART 1 - FIREBASE SETUP
 // ==========================================
 
 console.clear();
 
 console.log("=================================");
-console.log("Vehicle Admin System Starting...");
+console.log("Vehicle Values Starting...");
 console.log("=================================");
 
 // ==========================================
@@ -26,17 +27,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 import {
-    getStorage,
-    ref,
-    uploadBytes,
-    getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
-
-import {
     getAuth,
-    onAuthStateChanged,
     signInWithEmailAndPassword,
-    signOut
+    signOut,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 // ==========================================
@@ -67,8 +61,6 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
-const storage = getStorage(app);
-
 const auth = getAuth(app);
 
 console.log("Firebase Connected");
@@ -79,42 +71,61 @@ console.log("Firebase Connected");
 
 const ADMIN_EMAIL = "theg95705@gmail.com".toLowerCase();
 
-let isAdmin = false;
 let currentUser = null;
+let isAdmin = false;
 let selectedCard = null;
 
 // ==========================================
 // HTML ELEMENTS
 // ==========================================
 
-const adminOverlay = document.getElementById("adminOverlay");
-const loginOverlay = document.getElementById("loginOverlay");
+// Login
 
+const loginOverlay = document.getElementById("loginOverlay");
 const loginEmail = document.getElementById("loginEmail");
 const loginPassword = document.getElementById("loginPassword");
 const loginBtn = document.getElementById("loginBtn");
 const loginCancelBtn = document.getElementById("loginCancelBtn");
 const loginError = document.getElementById("loginError");
 
+// Admin Panel
+
+const adminOverlay = document.getElementById("adminOverlay");
+
 const vehicleName = document.getElementById("vehicleName");
 const vehicleValue = document.getElementById("vehicleValue");
 const vehicleDemand = document.getElementById("vehicleDemand");
 const vehicleImage = document.getElementById("vehicleImage");
-const imageUpload = document.getElementById("imageUpload");
+const vehicleLimited = document.getElementById("vehicleLimited");
+
+// Buttons
 
 const saveBtn = document.getElementById("saveBtn");
 const cancelBtn = document.getElementById("cancelBtn");
-
-// NEW LOGOUT BUTTON
 const logoutBtn = document.getElementById("logoutBtn");
 
+// ==========================================
+// CARD CONTAINER
+// ==========================================
+
+const cardsContainer = document.querySelector(".cards");
+
+// ==========================================
+// APP STARTUP
+// ==========================================
+
 console.log("HTML Loaded");
+console.log("Waiting for Authentication...");
+console.log("System Ready");
+// ==========================================
+// PART 2 - AUTHENTICATION SYSTEM
+// ==========================================
 
 // ==========================================
-// FIREBASE AUTH STATE
+// AUTH STATE
 // ==========================================
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
 
@@ -122,17 +133,15 @@ onAuthStateChanged(auth, (user) => {
 
         isAdmin = false;
 
-        if (logoutBtn) {
-            logoutBtn.style.display = "none";
-        }
+        logoutBtn.style.display = "none";
 
-        console.log("No user logged in");
+        console.log("No user logged in.");
 
         return;
+
     }
 
-    console.log("Logged in:", user.email);
-    console.log("UID:", user.uid);
+    console.log("Logged in as:", user.email);
 
     if (
         user.email &&
@@ -141,36 +150,31 @@ onAuthStateChanged(auth, (user) => {
 
         isAdmin = true;
 
-        if (logoutBtn) {
-            logoutBtn.style.display = "block";
-        }
+        logoutBtn.style.display = "inline-flex";
 
         loginOverlay.style.display = "none";
 
-        console.log("=================================");
+        console.log("==============================");
         console.log("ADMIN ACCESS GRANTED");
-        console.log("Admin editing enabled");
-        console.log("=================================");
+        console.log("==============================");
 
-    } else {
+        await loadVehicles();
+
+    }
+    else {
 
         isAdmin = false;
 
-        if (logoutBtn) {
-            logoutBtn.style.display = "none";
-        }
+        logoutBtn.style.display = "none";
 
-        console.log("ADMIN ACCESS DENIED");
+        console.log("Not an admin account.");
 
     }
 
 });
-// ==========================================
-// PART 2 - LOGIN SYSTEM & ADMIN CONTROLS
-// ==========================================
 
 // ==========================================
-// LOGIN BUTTON
+// LOGIN
 // ==========================================
 
 loginBtn.addEventListener("click", async () => {
@@ -178,33 +182,39 @@ loginBtn.addEventListener("click", async () => {
     loginError.style.display = "none";
 
     const email = loginEmail.value.trim().toLowerCase();
+
     const password = loginPassword.value;
 
     if (!email || !password) {
 
-        loginError.textContent = "Please enter your email and password.";
+        loginError.textContent =
+            "Please enter your email and password.";
+
         loginError.style.display = "block";
+
         return;
 
     }
 
     loginBtn.disabled = true;
+
     loginBtn.textContent = "Signing In...";
 
     try {
 
         await signInWithEmailAndPassword(
+
             auth,
+
             email,
+
             password
+
         );
 
         loginEmail.value = "";
+
         loginPassword.value = "";
-
-        loginOverlay.style.display = "none";
-
-        console.log("Login successful.");
 
     }
     catch (error) {
@@ -219,35 +229,59 @@ loginBtn.addEventListener("click", async () => {
     }
 
     loginBtn.disabled = false;
+
     loginBtn.textContent = "Sign In";
 
 });
 
 // ==========================================
-// LOG OUT BUTTON
+// LOG OUT
 // ==========================================
 
 logoutBtn.addEventListener("click", async () => {
 
-    const logout = confirm(
-        "Are you sure you want to log out?"
-    );
+    const confirmLogout =
+        confirm("Are you sure you want to log out?");
 
-    if (!logout) return;
+    if (!confirmLogout) return;
 
-    await logoutAdmin();
+    try {
+
+        await signOut(auth);
+
+        adminOverlay.style.display = "none";
+
+        loginOverlay.style.display = "none";
+
+        selectedCard = null;
+
+        isAdmin = false;
+
+        currentUser = null;
+
+        logoutBtn.style.display = "none";
+
+        console.log("Logged Out");
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
 
 });
 
 // ==========================================
-// CANCEL LOGIN
+// CLOSE LOGIN PANEL
 // ==========================================
 
 loginCancelBtn.addEventListener("click", () => {
 
     loginOverlay.style.display = "none";
 
-    loginEmail.value = "";
     loginPassword.value = "";
 
     loginError.style.display = "none";
@@ -278,29 +312,25 @@ let altPressed = false;
 
 document.addEventListener("keydown", (event) => {
 
-    if (event.key === "Control") {
-
+    if (event.key === "Control")
         ctrlPressed = true;
 
-    }
-
-    if (event.key === "Alt") {
-
+    if (event.key === "Alt")
         altPressed = true;
 
-    }
-
     if (
+
         ctrlPressed &&
         altPressed &&
         event.key === "ArrowRight"
-    ) {
 
-        console.log("Opening admin login...");
+    ) {
 
         loginOverlay.style.display = "flex";
 
         loginEmail.focus();
+
+        console.log("Admin Login Opened");
 
     }
 
@@ -308,45 +338,17 @@ document.addEventListener("keydown", (event) => {
 
 document.addEventListener("keyup", (event) => {
 
-    if (event.key === "Control") {
-
+    if (event.key === "Control")
         ctrlPressed = false;
 
-    }
-
-    if (event.key === "Alt") {
-
+    if (event.key === "Alt")
         altPressed = false;
 
-    }
-
 });
 
+console.log("Authentication Ready");
 // ==========================================
-// VEHICLE CLICK HANDLER
-// ==========================================
-
-document.querySelectorAll(".card").forEach((card) => {
-
-    card.addEventListener("click", () => {
-
-        if (!isAdmin) {
-
-            console.log("Viewing vehicle");
-
-            return;
-
-        }
-
-        openVehicleEditor(card);
-
-    });
-
-});
-
-console.log("Login System Ready");
-// ==========================================
-// PART 3 - VEHICLE LOADING & EDITOR
+// PART 3 - VEHICLE SYSTEM
 // ==========================================
 
 // ==========================================
@@ -366,37 +368,74 @@ async function loadVehicles() {
             const id = vehicle.id;
             const data = vehicle.data();
 
-            const name = document.getElementById(`name${id}`);
-            const value = document.getElementById(`value${id}`);
-            const demand = document.getElementById(`demand${id}`);
-            const image = document.getElementById(`image${id}`);
+            const card = document.querySelector(
+                `.card[data-id="${id}"]`
+            );
 
-            if (name) {
-                name.textContent = data.name || "Car Name";
-            }
+            if (!card) return;
 
-            if (value) {
-                value.textContent =
-                    "$" + Number(data.value || 0).toLocaleString();
-            }
+            // -------------------------
+            // Name
+            // -------------------------
 
-            if (demand) {
-                demand.textContent =
-                    (data.demand || 0) + "/10";
-            }
+            document.getElementById(`name${id}`).textContent =
+                data.name || "Unknown Vehicle";
 
-            if (image && data.image) {
-                image.src = data.image;
+            // -------------------------
+            // Value
+            // -------------------------
+
+            document.getElementById(`value${id}`).textContent =
+                "$" +
+                Number(data.value || 0).toLocaleString();
+
+            // -------------------------
+            // Demand
+            // -------------------------
+
+            document.getElementById(`demand${id}`).textContent =
+                (data.demand || 0) + "/10";
+
+            // -------------------------
+            // Image
+            // -------------------------
+
+            document.getElementById(`image${id}`).src =
+                data.image || "";
+
+            // -------------------------
+            // LIMITED VEHICLE
+            // -------------------------
+
+            const badge =
+                document.getElementById(`limitedBadge${id}`);
+
+            if (data.limited === true) {
+
+                card.classList.add("limited");
+
+                if (badge)
+                    badge.style.display = "flex";
+
+            } else {
+
+                card.classList.remove("limited");
+
+                if (badge)
+                    badge.style.display = "none";
+
             }
 
         });
 
-        console.log("Vehicles loaded.");
+        console.log("Vehicles Loaded");
 
     }
     catch (error) {
 
-        console.error("Vehicle Load Error:", error);
+        console.error("Vehicle Load Error");
+
+        console.error(error);
 
     }
 
@@ -406,161 +445,48 @@ async function loadVehicles() {
 // OPEN EDITOR
 // ==========================================
 
-function openVehicleEditor(card) {
+document.querySelectorAll(".card").forEach((card) => {
 
-    if (!isAdmin) return;
+    card.addEventListener("click", () => {
 
-    selectedCard = card;
+        if (!isAdmin)
+            return;
 
-    const id = card.dataset.id;
+        selectedCard = card;
 
-    vehicleName.value =
-        document.getElementById(`name${id}`).textContent;
+        const id = card.dataset.id;
 
-    vehicleValue.value =
-        document.getElementById(`value${id}`)
-        .textContent
-        .replace("$", "")
-        .replace(/,/g, "");
+        vehicleName.value =
+            document.getElementById(`name${id}`).textContent;
 
-    vehicleDemand.value =
-        document.getElementById(`demand${id}`)
-        .textContent
-        .replace("/10", "");
+        vehicleValue.value =
+            document.getElementById(`value${id}`)
+                .textContent
+                .replace("$", "")
+                .replace(/,/g, "");
 
-    vehicleImage.value =
-        document.getElementById(`image${id}`).src;
+        vehicleDemand.value =
+            document.getElementById(`demand${id}`)
+                .textContent
+                .replace("/10", "");
 
-    imageUpload.value = "";
+        vehicleImage.value =
+            document.getElementById(`image${id}`).src;
 
-    adminOverlay.style.display = "flex";
+        // -------------------------
+        // Limited Switch
+        // -------------------------
 
-    console.log("Editing vehicle:", id);
+        vehicleLimited.checked =
+            card.classList.contains("limited");
 
-}
+        adminOverlay.style.display = "flex";
 
-// ==========================================
-// SAVE VEHICLE
-// ==========================================
+        console.log("Editing Vehicle:", id);
 
-saveBtn.addEventListener("click", async () => {
-
-    if (!isAdmin) {
-
-        alert("Admin access required.");
-        return;
-
-    }
-
-    if (!selectedCard) {
-
-        alert("Please select a vehicle first.");
-        return;
-
-    }
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Saving...";
-
-    try {
-
-        const id = selectedCard.dataset.id;
-
-        let imageURL = vehicleImage.value.trim();
-
-        // Upload new image
-
-        if (
-            imageUpload.files &&
-            imageUpload.files.length > 0
-        ) {
-
-            const file = imageUpload.files[0];
-
-            const imageRef = ref(
-                storage,
-                `vehicles/${id}_${Date.now()}_${file.name}`
-            );
-
-            console.log("Uploading image...");
-
-            await uploadBytes(
-                imageRef,
-                file
-            );
-
-            imageURL =
-                await getDownloadURL(imageRef);
-
-            console.log("Image uploaded.");
-
-        }
-
-        const vehicleData = {
-
-            name: vehicleName.value.trim(),
-
-            value: Number(vehicleValue.value),
-
-            demand: Number(vehicleDemand.value),
-
-            image: imageURL
-
-        };
-
-        await setDoc(
-            doc(db, "vehicles", id),
-            vehicleData
-        );
-
-        // Update page immediately
-
-        document.getElementById(`name${id}`).textContent =
-            vehicleData.name;
-
-        document.getElementById(`value${id}`).textContent =
-            "$" + vehicleData.value.toLocaleString();
-
-        document.getElementById(`demand${id}`).textContent =
-            vehicleData.demand + "/10";
-
-        document.getElementById(`image${id}`).src =
-            imageURL;
-
-        adminOverlay.style.display = "none";
-
-        selectedCard = null;
-
-        imageUpload.value = "";
-
-        alert("Vehicle saved successfully!");
-
-        console.log("Vehicle updated:", id);
-
-    }
-    catch (error) {
-
-        console.error("Save Error:", error);
-
-        alert(error.message);
-
-    }
-
-    saveBtn.disabled = false;
-    saveBtn.textContent = "Save";
+    });
 
 });
-
-// ==========================================
-// INITIAL LOAD
-// ==========================================
-
-loadVehicles();
-
-console.log("Vehicle System Ready");
-// ==========================================
-// PART 4 - FINAL CONTROLS & LOGOUT
-// ==========================================
 
 // ==========================================
 // CANCEL EDIT
@@ -572,12 +498,10 @@ cancelBtn.addEventListener("click", () => {
 
     selectedCard = null;
 
-    imageUpload.value = "";
-
 });
 
 // ==========================================
-// CLOSE EDITOR WHEN CLICKING OUTSIDE
+// CLICK OUTSIDE PANEL
 // ==========================================
 
 adminOverlay.addEventListener("click", (event) => {
@@ -588,36 +512,110 @@ adminOverlay.addEventListener("click", (event) => {
 
         selectedCard = null;
 
-        imageUpload.value = "";
-
     }
 
 });
 
+console.log("Vehicle Editor Ready");
 // ==========================================
-// LOG OUT
+// PART 4 - SAVE, DEBUG & STARTUP
 // ==========================================
 
-async function logoutAdmin() {
+// ==========================================
+// SAVE VEHICLE
+// ==========================================
+
+saveBtn.addEventListener("click", async () => {
+
+    if (!isAdmin) {
+
+        alert("Admin access required.");
+
+        return;
+
+    }
+
+    if (!selectedCard) {
+
+        alert("No vehicle selected.");
+
+        return;
+
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
 
     try {
 
-        await signOut(auth);
+        const id = selectedCard.dataset.id;
 
-        console.log("Logged out");
+        const vehicleData = {
 
-        isAdmin = false;
-        currentUser = null;
-        selectedCard = null;
+            name: vehicleName.value.trim(),
+
+            value: Number(vehicleValue.value),
+
+            demand: Number(vehicleDemand.value),
+
+            image: vehicleImage.value.trim(),
+
+            limited: vehicleLimited.checked
+
+        };
+
+        await setDoc(
+
+            doc(db, "vehicles", id),
+
+            vehicleData
+
+        );
+
+        // ===========================
+        // UPDATE CARD
+        // ===========================
+
+        document.getElementById(`name${id}`).textContent =
+            vehicleData.name;
+
+        document.getElementById(`value${id}`).textContent =
+            "$" +
+            vehicleData.value.toLocaleString();
+
+        document.getElementById(`demand${id}`).textContent =
+            vehicleData.demand + "/10";
+
+        document.getElementById(`image${id}`).src =
+            vehicleData.image;
+
+        const badge =
+            document.getElementById(`limitedBadge${id}`);
+
+        if (vehicleData.limited) {
+
+            selectedCard.classList.add("limited");
+
+            if (badge)
+                badge.style.display = "flex";
+
+        }
+        else {
+
+            selectedCard.classList.remove("limited");
+
+            if (badge)
+                badge.style.display = "none";
+
+        }
 
         adminOverlay.style.display = "none";
-        loginOverlay.style.display = "none";
 
-        logoutBtn.style.display = "none";
+        selectedCard = null;
 
-        imageUpload.value = "";
+        console.log("Vehicle Saved:", id);
 
-        alert("You have been logged out.");
+        alert("Vehicle saved successfully!");
 
     }
     catch (error) {
@@ -628,12 +626,13 @@ async function logoutAdmin() {
 
     }
 
-}
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save";
 
-window.logoutAdmin = logoutAdmin;
+});
 
 // ==========================================
-// DEBUG
+// DEBUG COMMANDS
 // ==========================================
 
 window.debugAdmin = () => {
@@ -642,25 +641,22 @@ window.debugAdmin = () => {
 
     console.log("Current User:", currentUser);
     console.log("Email:", currentUser?.email);
-    console.log("Is Admin:", isAdmin);
+    console.log("Admin:", isAdmin);
     console.log("Selected Card:", selectedCard);
 
     console.log("===========================");
 
 };
 
-// ==========================================
-// PAGE LOADED
-// ==========================================
+window.refreshVehicles = async () => {
 
-window.addEventListener("load", () => {
+    console.clear();
 
-    console.log("=================================");
-    console.log("Vehicle Admin System Loaded");
-    console.log("CTRL + ALT + RIGHT ARROW");
-    console.log("=================================");
+    console.log("Refreshing Vehicles...");
 
-});
+    await loadVehicles();
+
+};
 
 // ==========================================
 // GLOBAL ERRORS
@@ -683,6 +679,21 @@ window.addEventListener("unhandledrejection", (event) => {
     console.error("Unhandled Promise");
 
     console.error(event.reason);
+
+});
+
+// ==========================================
+// PAGE LOADED
+// ==========================================
+
+window.addEventListener("load", () => {
+
+    console.log("=================================");
+    console.log("Vehicle Values Loaded");
+    console.log("Firebase Connected");
+    console.log("Admin Shortcut:");
+    console.log("CTRL + ALT + RIGHT ARROW");
+    console.log("=================================");
 
 });
 
